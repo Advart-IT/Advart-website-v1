@@ -380,270 +380,720 @@
 // }
 
 
-import React from "react";
+// import React, { useEffect, useMemo, useRef, useState } from "react";
 
-/** Small, reusable bullet list */
-const Bullets = ({
-  items,
-  dotClass = "bg-white",
-}: {
-  items: string[];
-  dotClass?: string;
-}) => (
-  <ul className="space-y-1.5">
-    {items.map((item, i) => (
-      <li
-        key={i}
-        className="flex items-start gap-2 text-sm md:text-base text-neutral-200"
-      >
-        <span
-          className={`w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0 ${dotClass}`}
-        />
-        <span>{item}</span>
-      </li>
-    ))}
-  </ul>
-);
+// /* ---------- utils ---------- */
+// const clamp = (n: number, min = 0, max = 1) => Math.max(min, Math.min(max, n));
 
-/** Card shell for each case study (text + visual layout) */
-const CaseStudyCard = ({
-  title,
-  subtitle,
-  kicker,
-  description,
-  left,
-  right,
-  reverseOnLg = false,
-}: {
-  title: string;
-  subtitle?: string;
-  kicker?: string;
-  description: string;
-  left?: React.ReactNode;
-  right?: React.ReactNode;
-  reverseOnLg?: boolean;
-}) => (
-  <div className="group relative">
-    <div className="rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.35)] p-4 md:p-6 transition-transform duration-500 hover:scale-[1.01]">
+// /* ---------- types ---------- */
+// type Slide = {
+//   imageSrc: string;
+//   category: string;
+//   title: string;
+//   description: string;
+//   services: string[];
+//   outcome: string;
+// };
+
+// /* ---------- scroll-reveal + slider ---------- */
+// const HeroScrollSlider = ({
+//   slides,
+//   autoInterval = 6000,
+// }: {
+//   slides: Slide[];
+//   autoInterval?: number;
+// }) => {
+//   const trackRef = useRef<HTMLDivElement | null>(null);
+//   const [p, setP] = useState(0); // scroll progress
+//   const [i, setI] = useState(0); // active slide
+//   const len = slides.length;
+
+//   // scroll progress
+//   useEffect(() => {
+//     const el = trackRef.current;
+//     if (!el) return;
+//     const onScroll = () => {
+//       const rect = el.getBoundingClientRect();
+//       const vh = window.innerHeight;
+//       const raw = 1 - (rect.bottom - vh) / rect.height;
+//       setP(clamp(raw));
+//     };
+//     onScroll();
+//     window.addEventListener("scroll", onScroll, { passive: true });
+//     window.addEventListener("resize", onScroll);
+//     return () => {
+//       window.removeEventListener("scroll", onScroll);
+//       window.removeEventListener("resize", onScroll);
+//     };
+//   }, []);
+
+//   // slider controls
+//   const go = (next: number) => setI((s) => (next + len) % len);
+//   const next = () => go(i + 1);
+//   const prev = () => go(i - 1);
+
+//   // keyboard
+//   useEffect(() => {
+//     const onKey = (e: KeyboardEvent) => {
+//       if (e.key === "ArrowRight") next();
+//       if (e.key === "ArrowLeft") prev();
+//     };
+//     window.addEventListener("keydown", onKey);
+//     return () => window.removeEventListener("keydown", onKey);
+//   }, [i, len]);
+
+//   // auto scroll
+//   useEffect(() => {
+//     const id = setInterval(() => {
+//       next();
+//     }, autoInterval);
+//     return () => clearInterval(id);
+//   }, [i, autoInterval]);
+
+//   // animation values
+//   const inset = 25 * (1 - p);
+//   const scale = 1.12 - 0.12 * p;
+//   const textOpacity = 0.35 + 0.65 * p;
+
+//   // render slides
+//   const renderedSlides = useMemo(
+//     () =>
+//       slides.map((s, idx) => {
+//         const active = idx === i;
+//         return (
+//           <div
+//             key={idx}
+//             className="absolute inset-0"
+//             style={{
+//               opacity: active ? 1 : 0,
+//               transform: `translateX(${
+//                 active ? "0%" : idx < i ? "-4%" : "4%"
+//               }) scale(${scale})`,
+//               transition:
+//                 "opacity 600ms ease, transform 700ms cubic-bezier(.22,.61,.36,1)",
+//               clipPath: `inset(${inset}% ${inset}% ${inset}% ${inset}%)`,
+//               willChange: "transform, opacity, clip-path",
+//             }}
+//           >
+//             <img
+//               src={s.imageSrc}
+//               alt=""
+//               className="w-full h-full object-cover"
+//             />
+//             {/* slightly dim overlay */}
+//             <div className="absolute inset-0 bg-black/35" />
+//           </div>
+//         );
+//       }),
+//     [slides, i, inset, scale]
+//   );
+
+//   const slide = slides[i];
+
+//   return (
+//     <section ref={trackRef} className="h-[160vh] bg-[#F6F7F9]">
+//       <div className="sticky top-0 h-screen overflow-hidden">
+//         {/* background slides */}
+//         <div className="absolute inset-0">{renderedSlides}</div>
+
+//         {/* overlay content */}
+//         <div className="relative z-10 h-full flex items-end md:items-center">
+//           <div
+//             className="w-full max-w-5xl mx-auto px-6 py-12 md:py-16"
+//             style={{ opacity: textOpacity, transition: "opacity 150ms linear" }}
+//           >
+//             <p className="text-xs uppercase tracking-widest text-neutral-300 mb-3">
+//               {slide.category}
+//             </p>
+//             <h2 className="text-3xl md:text-5xl font-medium mb-4 leading-tight text-white">
+//               {slide.title}
+//             </h2>
+//             <p className="text-base md:text-xl text-neutral-200 max-w-2xl leading-relaxed mb-6">
+//               {slide.description}
+//             </p>
+
+//             <div className="grid md:grid-cols-2 gap-8">
+//               <div>
+//                 <h4 className="text-xs font-medium text-neutral-300 mb-2">
+//                   Services
+//                 </h4>
+//                 <ul className="space-y-2">
+//                   {slide.services.map((sv, k) => (
+//                     <li
+//                       key={k}
+//                       className="flex items-start gap-3 text-sm text-neutral-200"
+//                     >
+//                       <span className="w-1 h-1 rounded-full bg-white/70 mt-2.5 flex-shrink-0" />
+//                       <span>{sv}</span>
+//                     </li>
+//                   ))}
+//                 </ul>
+//               </div>
+//               <div>
+//                 <h4 className="text-xs font-medium text-neutral-300 mb-2">
+//                   Outcome
+//                 </h4>
+//                 <p className="text-sm md:text-base text-neutral-200/90 leading-relaxed">
+//                   {slide.outcome}
+//                 </p>
+//               </div>
+//             </div>
+
+//             {/* nav */}
+//             <div className="mt-8 flex items-center justify-between">
+//               <div className="flex gap-2">
+//                 {slides.map((_, d) => (
+//                   <button
+//                     key={d}
+//                     onClick={() => go(d)}
+//                     aria-label={`Go to slide ${d + 1}`}
+//                     className={`h-1.5 rounded-full transition-all ${
+//                       d === i
+//                         ? "w-8 bg-white"
+//                         : "w-3 bg-white/40 hover:bg-white/70"
+//                     }`}
+//                   />
+//                 ))}
+//               </div>
+//               <div className="flex gap-3">
+//                 <button
+//                   onClick={prev}
+//                   className="px-3 py-2 rounded-md bg-white/10 hover:bg-white/20 transition text-white"
+//                 >
+//                   ‹
+//                 </button>
+//                 <button
+//                   onClick={next}
+//                   className="px-3 py-2 rounded-md bg-white/10 hover:bg-white/20 transition text-white"
+//                 >
+//                   ›
+//                 </button>
+//               </div>
+//             </div>
+
+//             <div className="mt-8 h-px w-full bg-white/20" />
+//           </div>
+//         </div>
+//       </div>
+//     </section>
+//   );
+// };
+
+// /* ---------- page ---------- */
+// const AdvartShowcase = () => {
+//   const slides: Slide[] = [
+//     {
+//       imageSrc:
+//         "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=1600&q=80",
+//       category: "Community • Campaign • IP",
+//       title: "Beelittle",
+//       description:
+//         "Beelittle turned 10, and the celebration had to feel as special as the journey. We transformed the milestone into moments that reached every tiny one's home.",
+//       services: [
+//         "30-day digital campaign",
+//         "Private screening & celebration",
+//         "Custom storybook",
+//       ],
+//       outcome:
+//         "Strong community engagement, deeper trust, and a visible lift in brand awareness—reflected directly in sales.",
+//     },
+//     {
+//       imageSrc:
+//         "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1600&q=80",
+//       category: "Consulting • Brand • Commerce",
+//       title: "Prathiksham",
+//       description:
+//         "A homegrown designer with 15 years of experience wanted to launch her own label. She came with a dream—we built the brand and the engine behind it.",
+//       services: ["Business consulting", "Branding & website", "Social presence"],
+//       outcome:
+//         "A go-to kurta line for working women; peak sales and a label people now recognise and seek out.",
+//     },
+//   ];
+
+//   return (
+//     <div className="min-h-screen bg-[#F6F7F9] text-black">
+//       <header className="max-w-5xl mx-auto px-6 py-12 md:py-16 text-center">
+//         <p className="text-xs uppercase tracking-widest text-neutral-500 mb-3">
+//           What we do
+//         </p>
+//         <h1 className="text-2xl md:text-3xl font-medium text-black">
+//           Work at <span className="font-semibold">Advart</span>
+//         </h1>
+//         <p className="text-sm md:text-base text-neutral-600 max-w-2xl mx-auto leading-relaxed mt-3">
+//           From scaling brands to building meaningful stories—our focus is doing
+//           fewer things exceptionally well.
+//         </p>
+//       </header>
+
+//       {/* one animated hero with auto slider */}
+//       <HeroScrollSlider slides={slides} autoInterval={6000} />
+
+//       <div className="max-w-5xl mx-auto px-6 pb-24">
+//         {/* more content here */}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default AdvartShowcase;
+
+
+
+
+
+
+
+
+// export default function ClientProjectsReel() {
+//   return (
+//     <main className="bg-[#F6F7F9] text-black">
+//       {/* Header */}
+//       <header className="px-8 py-20 sm:py-12 md:py-16 lg:pt-20 xl:py-24">
+//         <div className="max-w-6xl w-full mx-auto text-center">
+//           <h1 className="text-xl xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light leading-tight mb-3">
+//             Client Projects
+//           </h1>
+//           <p className="text-black/70">Selected work and case studies</p>
+//         </div>
+//       </header>
+
+//       {/* Layout */}
+//       <section className="px-8 pb-20 sm:pb-12 md:pb-16 xl:pb-24">
+//         <div className="max-w-6xl w-full mx-auto grid lg:grid-cols-12 items-stretch gap-12 xl:gap-16">
+//           {/* Reel (left) */}
+//           <div className="lg:col-span-4">
+//             <div className="relative overflow-hidden rounded-2xl border border-black/10 bg-white">
+//               <video
+//                 className="absolute inset-0 h-full w-full object-cover"
+//                 playsInline
+//                 autoPlay
+//                 muted
+//                 loop
+//                 controls={false}
+//                 poster="/portrait-video-placeholder.png"
+//                 preload="metadata"
+//                 disablePictureInPicture
+//                 controlsList="nodownload nofullscreen noplaybackrate"
+//               >
+//                 <source src="/hero/zing/three.webm" type="video/webm" />
+//               </video>
+//               {/* Fixed portrait (reel) aspect */}
+//               <div className="invisible pt-[140%]" />
+//             </div>
+//           </div>
+
+//           {/* Right column */}
+//           <div className="lg:col-span-8 min-h-0">
+//             <div className="h-full min-h-0 flex flex-col">
+//               {/* Main content */}
+//               <article className="space-y-6">
+//                 <h2 className="text-2xl md:text-3xl lg:text-4xl font-light tracking-tight">
+//                   Prathiksham
+//                 </h2>
+//                 <p className="text-black/70 leading-relaxed">
+//                   Transforming a 15-year design veteran&apos;s vision into a
+//                   recognized fashion label through strategic branding and digital
+//                   presence.
+//                 </p>
+
+//                 <div className="grid sm:grid-cols-2 gap-6">
+//                   <div className="space-y-3 text-black/80">
+//                     <h3 className="text-sm font-medium tracking-wide uppercase">
+//                       Our Approach
+//                     </h3>
+//                     <ul className="space-y-2">
+//                       <li className="flex gap-3">
+//                         <span className="w-1.5 h-1.5 rounded-full bg-black/30 mt-2" />
+//                         Strategic business consulting
+//                       </li>
+//                       <li className="flex gap-3">
+//                         <span className="w-1.5 h-1.5 rounded-full bg-black/30 mt-2" />
+//                         Complete brand identity system
+//                       </li>
+//                       <li className="flex gap-3">
+//                         <span className="w-1.5 h-1.5 rounded-full bg-black/30 mt-2" />
+//                         Digital presence &amp; social strategy
+//                       </li>
+//                     </ul>
+//                   </div>
+
+//                   <div className="space-y-3">
+//                     <h3 className="text-sm font-medium tracking-wide uppercase">
+//                       Impact
+//                     </h3>
+//                     <p className="text-black/70 leading-relaxed">
+//                       The kurta line became essential in working women&apos;s
+//                       wardrobes. Peak sales achieved with strong brand recognition
+//                       across the market.
+//                     </p>
+//                   </div>
+//                 </div>
+//               </article>
+
+//               {/* Bento images (side by side, fills remaining height) */}
+//               <div className="grow min-h-0 mt-8">
+//                 <div className="grid grid-cols-2 gap-4 h-full">
+//                   <div className="relative overflow-hidden rounded-2xl border border-black/10 bg-white">
+//                     <img
+//                       src="/your-image-1.jpg"
+//                       alt="Bento image 1"
+//                       className="h-full w-full object-cover"
+//                       draggable={false}
+//                     />
+//                   </div>
+//                   <div className="relative overflow-hidden rounded-2xl border border-black/10 bg-white">
+//                     <img
+//                       src="hero/contact/spotlight.png"
+//                       alt="Bento image 2"
+//                       className="h-full w-full object-cover"
+//                       draggable={false}
+//                     />
+//                   </div>
+//                 </div>
+//               </div>
+//               {/* End bento */}
+//             </div>
+//           </div>
+//         </div>
+//       </section>
+//     </main>
+//   );
+// }
+
+
+"use client"
+
+import type React from "react"
+import { useLayoutEffect, useRef } from "react"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+
+gsap.registerPlugin(ScrollTrigger)
+
+/* -------------------- CARD STACK WITH CONTENT LAYOUT -------------------- */
+type Card = { 
+  imageSrc: string
+  imageAlt?: string
+  title: string
+  description: string
+  whatTried: string[]
+  result: string
+}
+
+const GsapStackScroll: React.FC = () => {
+  const cards: Card[] = [
+    {
+      imageSrc: "hero/zing/bee-little.png",
+      title: "Beelittle",
+      description: "10 YEARS OF BEELITTLE (A campaign that stays close to our heart) Beelittle turned 10, and we knew the celebration had to feel just as special as the journey. So, we went above and beyond to make this milestone a part of every tiny one’s home.",
+      whatTried: [
+        "30-Day Strong Digital Campaign",
+        "Private Screening & Celebration for Followers",
+        "Custom Storybook",
+      ],
+      result: "A celebration that brought in strong community engagement, built deeper trust and skyrocketed brand awareness… all of which positively reflected in sales."
+    },
+    { 
+      imageSrc: "/hero/zing/zing.png",
+      title: "Zing",
+      description: "A homegrown kurta brand that feels like home to us... because we built it from scratch, turning failures into lessons and growth into success.",
+      whatTried: [
+        "Almost everything...",
+        "From consulting to strategy.",
+        "Production to post-production...",
+        "Everything it takes to make a brand stand tall.",
+        "We tested and tried it all with Zing."
+      ],
+      result: "A celebration that brought in strong community engagement, built deeper trust and skyrocketed brand awareness... all of which positively reflected in sales."
+    },
+    
+    {
+      imageSrc: "hero/zing/prathiksham.png",
+      title: "Prathiksham",
+      description: "A well-known homegrown designer with 15 years of experience wanted to launch her own brand. She came to us with a dream and together, we made it real.",
+      whatTried: [
+        "Business Consulting",
+        "Branding & Website Presence",
+        "Social Media Presence",
+      ],
+      result: "Her kurta line is now a go-to in every working woman’s wardrobe. Sales have peaked and the label has grown into a name that many proudly recognise."
+    },
+  ]
+
+  const wrapRef = useRef<HTMLDivElement | null>(null)
+  const cardRefs = useRef<HTMLDivElement[]>([])
+
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      const steps = cards.length - 1
+      const isMobile = window.innerWidth < 768
+      const stepPx = isMobile ? window.innerHeight * 1.5 : Math.max(window.innerHeight * 1.25, 1000)
+      const endDistance = steps > 0 ? `+=${Math.round(stepPx * steps)}` : "+=0"
+
+      cardRefs.current.forEach((el, i) => {
+        gsap.set(el, {
+          yPercent: i === 0 ? 0 : 100,
+          opacity: i === 0 ? 1 : 0,
+          zIndex: 10 + i,
+          willChange: "transform, opacity, filter",
+          force3D: true,
+          scale: 1,
+          filter: "blur(0px)"
+        })
+
+        // Animate content within each card
+        const heading = el.querySelector('.card-heading')
+        const description = el.querySelector('.card-description')
+        const whatTried = el.querySelector('.card-what-tried')
+        const result = el.querySelector('.card-result')
+        const image = el.querySelector('.card-image')
+
+        if (i === 0) {
+          // First card starts visible, animate content in
+          gsap.set([heading, description, whatTried, result], {
+            y: isMobile ? 30 : 50,
+            opacity: 0
+          })
+          gsap.set(image, {
+            x: isMobile ? 30 : 50,
+            opacity: 0,
+            rotation: isMobile ? 3 : 5
+          })
+
+          gsap.to([heading, description, whatTried, result], {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            stagger: 0.15,
+            ease: "power2.out",
+            delay: 0.5
+          })
+
+          gsap.to(image, {
+            x: 0,
+            opacity: 1,
+            rotation: 0,
+            duration: 1.5,
+            ease: "power2.out",
+            delay: 0.3
+          })
+        } else {
+          // Other cards animate in when they become active
+          gsap.set([heading, description, whatTried, result], {
+            y: isMobile ? 60 : 100,
+            opacity: 0
+          })
+          gsap.set(image, {
+            x: isMobile ? 60 : 100,
+            opacity: 0,
+            rotation: isMobile ? 7 : 10
+          })
+        }
+      })
+
+      const tl = gsap.timeline({
+        defaults: { ease: "power2.inOut", duration: 1 },
+        scrollTrigger: {
+          trigger: wrapRef.current,
+          start: "top top",
+          end: endDistance,
+          pin: true,
+          pinSpacing: true,
+          scrub: isMobile ? 2 : 3,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          snap: steps > 0 ? {
+            snapTo: (v) => Math.round(v * steps) / steps,
+            duration: { min: 0.4, max: 1 },
+            ease: "power2.out",
+          } : false,
+        },
+      })
+
+      cards.forEach((_, i) => {
+        const curr = cardRefs.current[i]
+        const prev = cardRefs.current[i - 1]
+
+        if (curr && i > 0) {
+          // Animate current card in
+          tl.fromTo(
+            curr,
+            { yPercent: 100, opacity: 0 },
+            { yPercent: 0, opacity: 1, duration: 1 },
+            ">"
+          )
+
+          // Animate content within the new card
+          const heading = curr.querySelector('.card-heading')
+          const description = curr.querySelector('.card-description')
+          const whatTried = curr.querySelector('.card-what-tried')
+          const result = curr.querySelector('.card-result')
+          const image = curr.querySelector('.card-image')
+
+          tl.to([heading, description, whatTried, result], {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            stagger: 0.1,
+            ease: "power2.out"
+          }, "<+0.3")
+
+          tl.to(image, {
+            x: 0,
+            opacity: 1,
+            rotation: 0,
+            duration: 1.2,
+            ease: "power2.out"
+          }, "<+0.2")
+        }
+
+        if (prev && i > 0) {
+          // Enhanced previous card animation with blur and shrink
+          tl.to(prev, { 
+            scale: isMobile ? 0.85 : 0.92, 
+            yPercent: isMobile ? -12 : -8, 
+            opacity: 0.3,
+            filter: "blur(8px)",
+            duration: 0.8 
+          }, "<+0.1")
+          .set(prev, { 
+            zIndex: 1, 
+            pointerEvents: "none",
+            filter: "blur(12px)",
+            opacity: 0
+          }, ">-0.2")
+        }
+      })
+
+      ScrollTrigger.refresh()
+    }, wrapRef)
+
+    return () => ctx.revert()
+  }, [cards.length])
+
+  cardRefs.current = []
+
+  return (
+    <section className="relative w-full">
       <div
-        className={`grid gap-4 md:gap-6 lg:grid-cols-2 items-center ${
-          reverseOnLg ? "lg:[&>div:first-child]:order-2" : ""
-        }`}
+        ref={wrapRef}
+        className="relative min-h-screen w-full overflow-visible"
       >
-        {/* Content */}
-        <div className="space-y-3">
-          <div>
-            <h2 className="text-xl md:text-2xl font-bold text-white mb-1.5">
-              {title}
-            </h2>
-            {subtitle && (
-              <h3 className="text-lg md:text-2xl font-bold text-neutral-200 leading-snug">
-                {subtitle}
-              </h3>
-            )}
-            {kicker && (
-              <p className="text-xs md:text-sm text-neutral-400 mt-1.5 italic">
-                {kicker}
-              </p>
-            )}
+        <div className="relative z-10 flex h-full items-center justify-center">
+          <div className="relative w-[95%] sm:w-[97%] lg:w-[99%] max-w-7xl mx-auto h-[85vh] sm:h-[88vh] lg:h-[90vh]">
+            {cards.map((card, i) => (
+              <div
+                key={i}
+                ref={(el) => {
+                  if (el) cardRefs.current[i] = el
+                }}
+                className="absolute inset-0"
+                style={{ zIndex: 10 + i }}
+              >
+                <div className="relative h-full w-full overflow-hidden rounded-xl sm:rounded-2xl shadow-xl sm:shadow-2xl ring-1 ring-black/5 will-change-transform bg-black text-white">
+                  
+                  {/* Card Content Layout */}
+                  <div className="h-full flex items-center px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
+                    <div className="max-w-7xl mx-auto w-full">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-16 items-center">
+                        
+                        {/* Left Content */}
+                        <div className="space-y-4 sm:space-y-6 lg:space-y-8 order-2 lg:order-1">
+                          {/* Main Heading */}
+                          <div className="card-heading">
+                            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light mb-3 sm:mb-4 lg:mb-6 leading-tight">
+                              {card.title}
+                            </h1>
+                            <div className="card-description">
+                              <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-light leading-relaxed text-gray-200">
+                                {card.description}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* What did we try? */}
+                          <div className="card-what-tried space-y-2 sm:space-y-3 lg:space-y-4">
+                            <h3 className="text-xs sm:text-sm font-medium text-white">What did we try?</h3>
+                            <ul className="space-y-1 sm:space-y-2 text-gray-300">
+                              {card.whatTried.map((item, idx) => (
+                                <li key={idx} className="flex items-start text-xs sm:text-xs lg:text-sm">
+                                  <span className="text-white mr-2 mt-0.5">•</span>
+                                  <span>{item}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          {/* And the result? */}
+                          <div className="card-result space-y-2 sm:space-y-3 lg:space-y-4">
+                            <h3 className="text-xs sm:text-sm font-medium text-white">And the result?</h3>
+                            <p className="text-gray-300 leading-relaxed text-xs sm:text-xs lg:text-sm">
+                              {card.result}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Right Image */}
+                        <div className="flex justify-center lg:justify-end order-1 lg:order-2">
+                          <div className="card-image relative w-full max-w-[280px] sm:max-w-sm md:max-w-md lg:max-w-md xl:max-w-lg">
+                            <div className="relative">
+                              <img 
+                                src={card.imageSrc}
+                                alt={card.imageAlt ?? `${card.title} brand showcase`}
+                                className="w-full h-auto object-contain rounded-lg"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Background Elements */}
+                  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute top-1/4 left-1/4 w-32 sm:w-48 lg:w-64 h-32 sm:h-48 lg:h-64 bg-blue-500/5 rounded-full blur-2xl sm:blur-3xl"></div>
+                    <div className="absolute bottom-1/4 right-1/4 w-48 sm:w-72 lg:w-96 h-48 sm:h-72 lg:h-96 bg-purple-500/5 rounded-full blur-2xl sm:blur-3xl"></div>
+                  </div>
+
+                </div>
+              </div>
+            ))}
           </div>
-
-          <p className="text-sm md:text-base text-neutral-300 leading-relaxed">
-            {description}
-          </p>
-
-          {left}
         </div>
-
-        {/* Visual */}
-        <div className="relative flex justify-center">{right}</div>
       </div>
-    </div>
-  </div>
-);
-
-/** Overlapping 2-image layout — centered inside the card */
-const OverlapMedia = ({
-  a,
-  b,
-}: {
-  a: { src: string; alt: string; label?: string; sublabel?: string };
-  b: { src: string; alt: string; label?: string; sublabel?: string };
-}) => {
-  return (
-    <div className="relative w-full flex justify-center">
-      {/* Centered wrapper that both images anchor to */}
-      <div className="relative w-[80%] max-w-md">
-        {/* Image A (bottom, larger) */}
-        <figure className="group relative w-full aspect-[5/3] rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.5)]">
-          <img
-            src={a.src}
-            alt={a.alt}
-            className="w-full h-full object-cover transition duration-500 group-hover:scale-[1.03]"
-          />
-          <figcaption className="absolute inset-x-0 bottom-0 p-3 sm:p-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent text-white">
-            {a.label && (
-              <div className="text-xs sm:text-sm font-semibold">{a.label}</div>
-            )}
-            {a.sublabel && (
-              <div className="text-[10px] sm:text-xs text-white/80">
-                {a.sublabel}
-              </div>
-            )}
-          </figcaption>
-        </figure>
-
-        {/* Image B (smaller, overlapping, aligned to the right of the centered wrapper) */}
-        <figure className="group absolute -top-6 right-0 w-[52%] aspect-[4/5] rounded-2xl overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.55)] rotate-3 hover:rotate-0 transition-[transform,box-shadow] duration-500">
-          <img
-            src={b.src}
-            alt={b.alt}
-            className="w-full h-full object-cover transition duration-500 group-hover:scale-[1.04]"
-          />
-          <figcaption className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/70 via-black/20 to-transparent text-white">
-            {b.label && (
-              <div className="text-xs sm:text-sm font-semibold">{b.label}</div>
-            )}
-            {b.sublabel && (
-              <div className="text-[10px] sm:text-xs text-white/80">
-                {b.sublabel}
-              </div>
-            )}
-          </figcaption>
-        </figure>
-      </div>
-    </div>
-  );
-};
-
-const AdvartShowcase = () => {
-  return (
-    <section className="relative overflow-hidden bg-black text-white">
-      {/* Ambient background effects (monochrome) */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(60rem_40rem_at_80%_-10%,rgba(255,255,255,0.08),transparent)]" />
-        <div className="absolute inset-0 opacity-[0.08] bg-[linear-gradient(to_right,transparent_0,transparent_23%,rgba(255,255,255,0.15)_24%,transparent_25%,transparent_100%),linear-gradient(to_bottom,transparent_0,transparent_23%,rgba(255,255,255,0.15)_24%,transparent_25%,transparent_100%)] bg-[length:24px_24px]" />
-        <div className="absolute inset-0 bg-[radial-gradient(100rem_40rem_at_50%_120%,rgba(0,0,0,0.6),transparent)]" />
-      </div>
-
-      {/* Header */}
-      <div className="max-w-6xl mx-auto px-6 pt-8 md:pt-12 text-center">
-        <h1 className="font-light mb-2 text-white text-xl sm:text-2xl md:text-3xl lg:text-4xl">
-          All exciting things we do at{" "}
-          <span className="text-white font-semibold">Advart...</span>
-        </h1>
-        <p className="text-xs sm:text-sm md:text-lg lg:text-xl text-neutral-400 leading-relaxed font-light mt-3 max-w-4xl mx-auto">
-          From scaling a brand from ₹30K to ₹3Cr, to building a homegrown brand
-          like Zing, to creating many more meaningful brand stories… We love
-          doing it all, while nailing it right!
-        </p>
-      </div>
-
-      {/* Case Studies */}
-      <div className="max-w-6xl mx-auto px-6 py-8 md:py-12">
-        <div className="space-y-8 md:space-y-12">
-          {/* Beelittle */}
-          <CaseStudyCard
-            title="Beelittle"
-            description="Beelittle turned 10, and we knew the celebration had to feel just as special as the journey. So, we went above and beyond to make this milestone a part of every tiny one's home."
-            left={
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <h4 className="text-xs md:text-sm font-semibold uppercase tracking-wider text-neutral-400 mb-2">
-                    What did Advart do?
-                  </h4>
-                  <Bullets
-                    items={[
-                      "30-Day Strong Digital Campaign",
-                      "Private Screening & Celebration for Followers",
-                      "Custom Storybook",
-                    ]}
-                    dotClass="bg-white"
-                  />
-                </div>
-                <div>
-                  <h4 className="text-xs md:text-sm font-semibold uppercase tracking-wider text-neutral-400 mb-2">
-                    And the result?
-                  </h4>
-                  <p className="text-sm md:text-base text-neutral-200 leading-relaxed">
-                    A celebration that brought in strong community engagement,
-                    built deeper trust and skyrocketed brand awareness… all of
-                    which positively reflected in sales.
-                  </p>
-                </div>
-              </div>
-            }
-            right={
-              <OverlapMedia
-                a={{
-                  src: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=1400&q=80",
-                  alt: "Beelittle anniversary crowd moment",
-                  label: "10 Years",
-                  sublabel: "Milestone Celebration",
-                }}
-                b={{
-                  src: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1200&q=80",
-                  alt: "Storybook & screening event",
-                  label: "Community Love",
-                  sublabel: "Storybook • Screening",
-                }}
-              />
-            }
-          />
-
-          {/* Prathiksham */}
-          <CaseStudyCard
-            title="Prathiksham"
-            description="A well-known homegrown designer with 15 years of experience wanted to launch her own brand. She came to us with a dream and together, we made it real."
-            reverseOnLg
-            left={
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <h4 className="text-xs md:text-sm font-semibold uppercase tracking-wider text-neutral-400 mb-2">
-                    What did we help her with?
-                  </h4>
-                  <Bullets
-                    items={[
-                      "Business Consulting",
-                      "Branding & Website Presence",
-                      "Social Media Presence",
-                    ]}
-                    dotClass="bg-white"
-                  />
-                </div>
-                <div>
-                  <h4 className="text-xs md:text-sm font-semibold uppercase tracking-wider text-neutral-400 mb-2">
-                    And what happened?
-                  </h4>
-                  <p className="text-sm md:text-base text-neutral-200 leading-relaxed">
-                    Her kurta line is now a go-to in every working woman's
-                    wardrobe. Sales have peaked and the label has grown into a
-                    name that many proudly recognise.
-                  </p>
-                </div>
-              </div>
-            }
-            right={
-              <OverlapMedia
-                a={{
-                  src: "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1400&q=80",
-                  alt: "Editorial lookbook shoot",
-                  label: "Fashion Brand",
-                  sublabel: "Brand Launch",
-                }}
-                b={{
-                  src: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80",
-                  alt: "E-commerce & social grid",
-                  label: "Presence",
-                  sublabel: "Web • Social",
-                }}
-              />
-            }
-          />
-        </div>
-      </div>      
     </section>
-  );
-};
+  )
+}
 
-export default AdvartShowcase;
+/* -------------------- PAGE SECTION -------------------- */
+
+export default function AdvartSection() {
+  return (
+    <section id="advart" className="scroll-mt-24 md:scroll-mt-32">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 pt-6 sm:pt-8 md:pt-10 lg:pt-12 pb-8 sm:pb-10 md:pb-12 lg:pb-14">
+        <div className="flex flex-col items-center justify-center text-black bg-[#F6F7F9] rounded-xl sm:rounded-2xl">
+          {/* Heading block */}
+          <section className="w-full mb-6 sm:mb-8 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+            <div className="max-w-6xl mx-auto text-center">
+              <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-light mb-3 sm:mb-4 leading-tight">
+                All exciting things we do at{" "}
+                <span className="font-semibold">Advart...</span>
+              </h2>
+              <p className="text-sm sm:text-base text-black/70 leading-relaxed font-light whitespace-pre-line max-w-sm sm:max-w-xl lg:max-w-2xl mx-auto">
+                From scaling a brand from ₹30K to ₹3Cr, to building a homegrown
+                brand like Zing, to creating many more meaningful brand stories…
+                We love doing it all, while nailing it right!
+              </p>
+            </div>
+          </section>
+
+          {/* Enhanced Animation with content layout */}
+          <div className="w-full">
+            <GsapStackScroll />
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}

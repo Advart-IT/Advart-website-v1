@@ -7,46 +7,64 @@ const Strategy = () => {
   const textRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    let ticking = false
+
     const handleScroll = () => {
-      if (!sectionRef.current || !textRef.current) return
+      if (ticking) return
+      ticking = true
 
-      const section = sectionRef.current
-      const text = textRef.current
-      const rect = section.getBoundingClientRect()
-      const windowHeight = window.innerHeight
+      requestAnimationFrame(() => {
+        if (!sectionRef.current || !textRef.current) {
+          ticking = false
+          return
+        }
 
-      const isMobile = window.innerWidth < 768
-      const startReveal = windowHeight * (isMobile ? 0.9 : 0.8)
-      const endReveal = windowHeight * (isMobile ? 0.3 : 0.2)
+        const section = sectionRef.current
+        const text = textRef.current
+        const rect = section.getBoundingClientRect()
+        const windowHeight = window.innerHeight
 
-      const elementTop = rect.top
-      const elementHeight = rect.height
+        const isMobile = window.innerWidth < 768
+        const startReveal = windowHeight * (isMobile ? 1.2 : 1.1)
+        const endReveal = windowHeight * (isMobile ? 0.7 : 0.65)
 
-      let progress = 0
-      if (elementTop < startReveal && elementTop > endReveal - elementHeight) {
-        progress = Math.min(1, Math.max(0, (startReveal - elementTop) / (startReveal - endReveal + elementHeight)))
-      } else if (elementTop <= endReveal - elementHeight) {
-        progress = 1
-      }
+        const elementTop = rect.top
+        const elementHeight = rect.height
 
-      const words = text.querySelectorAll(".reveal-word")
-      words.forEach((word, index) => {
-        const wordProgress = Math.max(0, Math.min(1, progress * words.length - index))
-        const opacity = 0.3 + 0.7 * wordProgress
-        const grayValue = Math.floor(100 + 155 * wordProgress)
+        let progress = 0
+        if (elementTop < startReveal && elementTop > endReveal - elementHeight) {
+          progress = Math.min(
+            1,
+            Math.max(0, (startReveal - elementTop) / (startReveal - endReveal + elementHeight))
+          )
+        } else if (elementTop <= endReveal - elementHeight) {
+          progress = 1
+        }
 
-        Object.assign((word as HTMLElement).style, {
-          opacity: opacity.toString(),
-          color: `rgb(${grayValue}, ${grayValue}, ${grayValue})`,
-          transition: "all 0.3s ease-out",
+        const words = text.querySelectorAll<HTMLSpanElement>(".reveal-word")
+        const total = words.length
+
+        words.forEach((word, index) => {
+          const wordProgress = Math.max(0, Math.min(1, progress * (total + 4) - index))
+          const opacity = 0.3 + 0.7 * wordProgress
+          const grayValue = Math.floor(100 + 155 * wordProgress)
+
+          word.style.opacity = opacity.toString()
+          word.style.color = `rgb(${grayValue}, ${grayValue}, ${grayValue})`
         })
+
+        ticking = false
       })
     }
 
-    window.addEventListener("scroll", handleScroll)
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    window.addEventListener("resize", handleScroll)
     handleScroll()
 
-    return () => window.removeEventListener("scroll", handleScroll)
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+      window.removeEventListener("resize", handleScroll)
+    }
   }, [])
 
   const strategyText =
@@ -54,27 +72,35 @@ const Strategy = () => {
   const words = strategyText.split(" ")
 
   return (
-    <section
-      ref={sectionRef}
-      className="flex flex-col items-center justify-center bg-black text-white relative overflow-hidden py-20 sm:py-12 md:py-16 lg:pt-20 xl:py-24 px-8"
-    >
-      <div className="max-w-4xl w-full text-center relative z-10">
-        <div
-          ref={textRef}
-          className="text-xl xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white leading-relaxed font-light"
-        >
-          {words.map((word, index) => (
-            <span
-              key={index}
-              className="reveal-word inline-block mr-3 mb-2"
-              style={{
-                opacity: 0.3,
-                color: "rgb(100, 100, 100)",
-              }}
+    <section id="strategy" ref={sectionRef}>
+      <div className="w-full pt-6 sm:pt-8 md:pt-10 pb-8 sm:pb-10 md:pb-12">
+        <div className="relative overflow-hidden bg-black text-white">
+          <div className="max-w-4xl w-full mx-auto text-center relative z-10 py-12 sm:py-14 md:py-16 px-6">
+            {/* Heading */}
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight text-white mb-4">
+              Our Strategy
+            </h2>
+
+            {/* Subheading (animated line) */}
+            <div
+              ref={textRef}
+              className="text-base sm:text-lg md:text-xl font-medium leading-tight"
             >
-              {word}
-            </span>
-          ))}
+              {words.map((word, index) => (
+                <span
+                  key={index}
+                  className="reveal-word inline-block mr-3 mb-2"
+                  style={{
+                    opacity: 0.3,
+                    color: "rgb(100, 100, 100)",
+                    transition: "all 0.3s ease-out",
+                  }}
+                >
+                  {word}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>

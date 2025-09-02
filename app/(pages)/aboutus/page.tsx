@@ -202,19 +202,24 @@ function VideoInline({ src }: { src: string }) {
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-[#F6F7F9] text-black py-12 md:py-20">
-      <div className="container mx-auto px-4 md:px-6">
+    <div className="min-h-screen bg-[#F6F7F9] text-black">
+      <div>
         {/* HERO SECTION */}
-        <section className="mb-16 md:mb-24">
+        <section className="mb-12 md:mb-16">
+          <img
+            src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80"
+            alt="Creative team collaboration in black and white"
+            className="w-full h-64 md:h-80 object-cover filter grayscale brightness-110 contrast-125 rounded-2xl mb-8"
+          />
           <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* Content */}
-              <div className="lg:col-span-7 flex flex-col justify-center space-y-6">
-                <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+              <div className="lg:col-span-7 flex flex-col justify-center space-y-4">
+                <h1 className="text-3xl md:text-4xl font-bold leading-tight">
                   And the love for <span className="text-[#000000]">art</span> brought us here…
                 </h1>
 
-                <div className="space-y-4 text-lg text-gray-600">
+                <div className="space-y-3 text-base text-gray-600">
                   <p>
                     We come from the land where they say "Vaanga Poonga" — the most
                     respectful city in Tamil Nadu, Coimbatore. Our team, drawn from
@@ -238,32 +243,28 @@ export default function AboutPage() {
         </section>
 
         {/* TEAM SECTION */}
-        <section className="mb-16 md:mb-24">
+        <section className="mb-8 md:mb-12">
           <div className="max-w-6xl mx-auto text-center">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold mb-3">
               Meet the <span className="text-[#000000]">Team</span>
             </h2>
-            <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+            <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto mb-6">
               Who's going to be working on your brand's growth.
             </p>
 
-            {/* Team intro copy */}
-            <div className="max-w-3xl mx-auto mb-10">
-              <p className="text-gray-700 leading-relaxed">
+            {/* Team intro copy - condensed */}
+            <div className="max-w-3xl mx-auto mb-8">
+              <p className="text-gray-700 leading-relaxed text-sm md:text-base">
                 We are a mix of seasoned specialists and young creatives from all
                 kinds of backgrounds, with years of marketing experience and a knack
-                for knowing what works—and what doesn’t—for your brand.
-              </p>
-              <p className="text-gray-700 leading-relaxed mt-4">
-                No hierarchy here. From interns to senior experts, everyone gets
-                involved in every project. That’s how we create content that’s
-                on-trend, consistent and truly sounds like your brand, because every
-                project is special to us!
+                for knowing what works. No hierarchy here—everyone gets involved in
+                every project to create content that's on-trend, consistent and truly
+                sounds like your brand.
               </p>
             </div>
 
-            {/* Just one group image */}
-            <div className="relative max-w-5xl mx-auto rounded-2xl overflow-hidden shadow-lg">
+            {/* Team image */}
+            <div className="relative max-w-4xl mx-auto rounded-2xl overflow-hidden shadow-lg">
               <img
                 src="/aboutus/team.JPG"
                 alt="Our Creative Team"

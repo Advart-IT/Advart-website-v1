@@ -75,19 +75,10 @@ export function SiteHeader() {
   return (
     <>
       <header
-        className={`fixed top-0 z-[50] w-full px-3 sm:px-4 lg:px-6 py-4 flex items-center justify-center transition-all duration-500 ease-out ${
-          isVisible && showNavbar ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
-        }`}
+        className="fixed top-0 w-full flex items-center justify-center transition-all duration-500 ease-out z-50 shadow-sm"
       >
         <div
-          className="w-full max-w-6xl h-14 flex items-center justify-between text-black/90 px-4 sm:px-6 lg:px-8 rounded-2xl"
-          style={{
-            background: "rgba(255, 255, 255, 0.25)",
-            backdropFilter: "blur(20px) saturate(180%)",
-            WebkitBackdropFilter: "blur(20px) saturate(180%)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.05)",
-          }}
+          className="w-full  flex items-center justify-between text-black/90 px-4 sm:px-6 lg:px-8  bg-[#F6F7F9]"
         >
           <Link
             href="/home"
@@ -97,7 +88,7 @@ export function SiteHeader() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex gap-4 lg:gap-6 items-center justify-center flex-grow">
+          <nav className="hidden md:flex gap-4 lg:gap-6 items-center justify-center flex-grow py-4">
             {[
               {
                 href: "/home",

@@ -62,7 +62,6 @@ import Dot from "@/components/hero/dot"
 import Insights from "@/components/hero/insights"
 import InsightHero from "@/components/hero/insight"
 import Strategy from "@/components/hero/strategy"
-import WhyAdvart from '@/components/hero/whyadvart'
 
 export default function Home() {
   useEffect(() => {
@@ -93,8 +92,8 @@ export default function Home() {
   }, [])
 
   return (
- <div className="flex flex-col min-h-[100dvh] text-black dark:text-gray-50 bg-[#F6F7F9]">
-      <main className="flex-1">
+ <div>
+      <main >
         <HeroSection />
         <Services />
         <Strategy />

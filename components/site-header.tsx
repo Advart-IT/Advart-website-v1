@@ -7,6 +7,9 @@ import { Menu, X } from "lucide-react"
 export function SiteHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
+  const [showNavbar, setShowNavbar] = useState(false)
+  const [isScrolling, setIsScrolling] = useState(false)
+  const [isHoveringTop, setIsHoveringTop] = useState(false)
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
@@ -30,6 +33,39 @@ export function SiteHeader() {
   }, [isMenuOpen])
 
   useEffect(() => {
+    let scrollTimeout: NodeJS.Timeout
+
+    const handleScroll = () => {
+      setIsScrolling(true)
+      clearTimeout(scrollTimeout)
+
+      scrollTimeout = setTimeout(() => {
+        setIsScrolling(false)
+      }, 1500) // Hide after 1.5 seconds of no scrolling
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+      clearTimeout(scrollTimeout)
+    }
+  }, [])
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      // Show navbar when mouse is in top 100px of viewport
+      setIsHoveringTop(e.clientY <= 100)
+    }
+
+    document.addEventListener("mousemove", handleMouseMove)
+    return () => document.removeEventListener("mousemove", handleMouseMove)
+  }, [])
+
+  useEffect(() => {
+    setShowNavbar(isScrolling || isHoveringTop || isMenuOpen)
+  }, [isScrolling, isHoveringTop, isMenuOpen])
+
+  useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(true)
     }, 100)
@@ -39,8 +75,8 @@ export function SiteHeader() {
   return (
     <>
       <header
-        className={`sticky top-0 z-[50] w-full px-3 sm:px-4 lg:px-6 py-4 flex items-center justify-center transition-all duration-700 ease-out ${
-          isVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
+        className={`fixed top-0 z-[50] w-full px-3 sm:px-4 lg:px-6 py-4 flex items-center justify-center transition-all duration-500 ease-out ${
+          isVisible && showNavbar ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
         }`}
       >
         <div
@@ -58,24 +94,35 @@ export function SiteHeader() {
             className="flex items-center gap-2 font-light text-lg sm:text-xl transition-all duration-300 ease-out hover:scale-105 hover:text-black"
           >
             <img src="/logo.png" alt="Advart Logo" className="w-11 h-11 sm:w-16 sm:h-16 object-contain" />
-
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex gap-4 lg:gap-6 items-center justify-center flex-grow">
             {[
-              { href: "/home", label: "Home", delay: "delay-100" },
-              { href: "/aboutus", label: "About us", delay: "delay-200" },
-              { href: "/careers", label: "Careers", delay: "delay-300" },
-              { href: "/contactus", label: "Contact Us", delay: "delay-500" },
+              {
+                href: "/home",
+                label: "Home",
+                delay: "delay-100",
+              },
+              {
+                href: "/aboutus",
+                label: "About us",
+                delay: "delay-200",
+              },
+              {
+                href: "/careers",
+                label: "Careers",
+                delay: "delay-300",
+              },
+              {
+                href: "/contactus",
+                label: "Contact Us",
+                delay: "delay-500",
+              },
             ].map((item) => (
               <div
                 key={item.href}
-                className={`${
-                  isVisible
-                    ? `animate-in fade-in slide-in-from-bottom-2 duration-500 ${item.delay}`
-                    : "opacity-0"
-                }`}
+                className={`${isVisible ? `animate-in fade-in slide-in-from-bottom-2 duration-500 ${item.delay}` : "opacity-0"}`}
               >
                 <Link
                   href={item.href}
@@ -140,18 +187,30 @@ export function SiteHeader() {
 
             <nav className="flex flex-col items-center gap-8 text-center mb-16">
               {[
-                { href: "/home", label: "Home", delay: "delay-300" },
-                { href: "/aboutus", label: "About us", delay: "delay-400" },
-                { href: "/careers", label: "Careers", delay: "delay-500" },
-                { href: "/contactus", label: "Contact Us", delay: "delay-600" },
+                {
+                  href: "/home",
+                  label: "Home",
+                  delay: "delay-300",
+                },
+                {
+                  href: "/aboutus",
+                  label: "About us",
+                  delay: "delay-400",
+                },
+                {
+                  href: "/careers",
+                  label: "Careers",
+                  delay: "delay-500",
+                },
+                {
+                  href: "/contactus",
+                  label: "Contact Us",
+                  delay: "delay-600",
+                },
               ].map((item) => (
                 <div
                   key={item.href}
-                  className={`${
-                    isMenuOpen
-                      ? `animate-in slide-in-from-right-8 fade-in duration-500 ${item.delay}`
-                      : "opacity-0 translate-x-8"
-                  }`}
+                  className={`${isMenuOpen ? `animate-in slide-in-from-right-8 fade-in duration-500 ${item.delay}` : "opacity-0 translate-x-8"}`}
                 >
                   <Link
                     href={item.href}

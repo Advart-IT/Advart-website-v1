@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 interface Card {
   title: string
@@ -14,6 +14,24 @@ interface Card {
 
 export default function ServicesSection() {
   const [active, setActive] = useState<Card | null>(null)
+
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [isFlipping, setIsFlipping] = useState(false)
+  const words = ["Social Media", "Digital Marketing", "Brand Growth", "Performance Ads"]
+  const interval = 2500
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setIsFlipping(true)
+
+      setTimeout(() => {
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % words.length)
+        setIsFlipping(false)
+      }, 300) // Half of the animation duration
+    }, interval)
+
+    return () => clearInterval(timer)
+  }, [words.length, interval])
 
   const cards: Card[] = [
     {
@@ -74,14 +92,51 @@ export default function ServicesSection() {
         <div className="max-w-6xl mx-auto">
           <h2 className="text-center">
             <div className="w-full flex items-center justify-center">
-              <div className="inline-flex items-baseline justify-center">
+              <div className="flex items-baseline justify-center">
                 <span className="text-black font-thin xs:text-xl sm:text-2xl md:text-3xl text-xl lg:text-4xl">
                   Trusted in&nbsp;
                 </span>
-                <div className="relative inline-block align-baseline min-w-[100px]">
-                  <span className="block text-center font-semibold text-black whitespace-nowrap text-lg sm:text-2xl md:text-3xl lg:text-4xl leading-tight">
-                    Social Media
+                <div className="relative inline-block align-baseline w-[200px] sm:w-[250px] md:w-[280px] lg:w-[320px] overflow-hidden text-left">
+                  <span
+                    className={`block font-semibold text-black whitespace-nowrap text-lg sm:text-2xl md:text-3xl lg:text-4xl leading-tight transition-transform duration-600 ease-in-out ${
+                      isFlipping ? "animate-slide-up-out" : "animate-slide-up-in"
+                    }`}
+                    key={currentIndex}
+                  >
+                    {words[currentIndex]}
                   </span>
+
+                  <style jsx>{`
+                    @keyframes slide-up-out {
+                      0% {
+                        transform: translateY(0%);
+                        opacity: 1;
+                      }
+                      100% {
+                        transform: translateY(-100%);
+                        opacity: 0;
+                      }
+                    }
+                    
+                    @keyframes slide-up-in {
+                      0% {
+                        transform: translateY(100%);
+                        opacity: 0;
+                      }
+                      100% {
+                        transform: translateY(0%);
+                        opacity: 1;
+                      }
+                    }
+                    
+                    .animate-slide-up-out {
+                      animation: slide-up-out 0.6s ease-in-out;
+                    }
+                    
+                    .animate-slide-up-in {
+                      animation: slide-up-in 0.6s ease-in-out;
+                    }
+                  `}</style>
                 </div>
               </div>
             </div>
@@ -133,35 +188,17 @@ export default function ServicesSection() {
                   </div>
                   <h3 className="text-lg font-semibold mb-3">{card.title}</h3>
                   <p className="text-black/70 text-sm line-clamp-4">
-                    {card.tooltip.length > 120 ? (
-                      <>
-                        {card.tooltip.substring(0, 120)}…{" "}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setActive(card)
-                          }}
-                          className="underline underline-offset-2 font-medium hover:text-black transition-colors"
-                          aria-label={`Read more about ${card.title}`}
-                        >
-                          Read more
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        {card.tooltip}{" "}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setActive(card)
-                          }}
-                          className="underline underline-offset-2 font-medium hover:text-black transition-colors"
-                          aria-label={`Read more about ${card.title}`}
-                        >
-                          Read more
-                        </button>
-                      </>
-                    )}
+                    {card.tooltip.length > 120 ? <>{card.tooltip.substring(0, 120)}… </> : <>{card.tooltip} </>}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setActive(card)
+                      }}
+                      className="underline underline-offset-2 font-medium hover:text-black transition-colors"
+                      aria-label={`Read more about ${card.title}`}
+                    >
+                      Read more
+                    </button>
                   </p>
                 </div>
               </div>
@@ -173,10 +210,7 @@ export default function ServicesSection() {
       {/* Modal */}
       {active && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" role="dialog" aria-modal="true">
-          <div 
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm" 
-            onClick={() => setActive(null)} 
-          />
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setActive(null)} />
 
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col min-h-0 transform transition-all duration-300 ease-out scale-100 opacity-100">
             <div className="absolute top-4 right-4 z-10">

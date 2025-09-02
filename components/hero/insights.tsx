@@ -11,7 +11,7 @@ type Insight = {
 export default function Insights() {
   const insights: Insight[] = [
     {
-      icon: "/hero/insights/bar-1.svg",
+      icon: "/hero/insights/bar.svg",
       text: "20x Revenue Growth",
       description: "Scaled an e-commerce business from 5x sales to 20x.",
     },

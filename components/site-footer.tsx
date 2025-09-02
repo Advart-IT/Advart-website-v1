@@ -22,13 +22,13 @@ export function SiteFooter() {
                   rel="noopener noreferrer"
                   className="hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
                 >
-                  123 Business Street, City, Country
+                  105/101, Bharathi Colony Rd,<br/> Peelamedu, Coimbatore - 641004
                 </a>
               </p>
               <p>
                 📞{" "}
                 <a
-                  href="tel:+1234567890"
+                  href="tel:+91 82488 00705"
                   className="hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
                 >
                   +1 234 567 890

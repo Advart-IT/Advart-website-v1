@@ -62,6 +62,7 @@ import Dot from "@/components/hero/dot"
 import Insights from "@/components/hero/insights"
 import InsightHero from "@/components/hero/insight"
 import Strategy from "@/components/hero/strategy"
+import WhyAdvart from '@/components/hero/whyadvart'
 
 export default function Home() {
   useEffect(() => {

@@ -11,54 +11,42 @@ export function SiteHeader() {
   const [isScrolling, setIsScrolling] = useState(false)
   const [isHoveringTop, setIsHoveringTop] = useState(false)
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen)
-  }
+  const toggleMenu = () => setIsMenuOpen((v) => !v)
 
+  // Lock body scroll when menu is open
   useEffect(() => {
-    document.body.style.overflow = isMenuOpen ? "hidden" : "auto"
-    return () => {
-      document.body.style.overflow = "auto"
-    }
+    const { style } = document.body
+    const prev = style.overflow
+    style.overflow = isMenuOpen ? "hidden" : prev || "auto"
+    return () => { style.overflow = prev || "auto" }
   }, [isMenuOpen])
 
+  // Auto-close menu on desktop resize
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768 && isMenuOpen) {
-        setIsMenuOpen(false)
-      }
+    const onResize = () => {
+      if (window.innerWidth >= 768 && isMenuOpen) setIsMenuOpen(false)
     }
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
+    window.addEventListener("resize", onResize)
+    return () => window.removeEventListener("resize", onResize)
   }, [isMenuOpen])
 
+  // Scroll detection
   useEffect(() => {
-    let scrollTimeout: NodeJS.Timeout
-
-    const handleScroll = () => {
+    let t: ReturnType<typeof setTimeout>
+    const onScroll = () => {
       setIsScrolling(true)
-      clearTimeout(scrollTimeout)
-
-      scrollTimeout = setTimeout(() => {
-        setIsScrolling(false)
-      }, 1500) // Hide after 1.5 seconds of no scrolling
+      clearTimeout(t)
+      t = setTimeout(() => setIsScrolling(false), 1500)
     }
-
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => {
-      window.removeEventListener("scroll", handleScroll)
-      clearTimeout(scrollTimeout)
-    }
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => { window.removeEventListener("scroll", onScroll); clearTimeout(t) }
   }, [])
 
+  // Desktop: show when mouse near top
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      // Show navbar when mouse is in top 100px of viewport
-      setIsHoveringTop(e.clientY <= 100)
-    }
-
-    document.addEventListener("mousemove", handleMouseMove)
-    return () => document.removeEventListener("mousemove", handleMouseMove)
+    const onMove = (e: MouseEvent) => setIsHoveringTop(e.clientY <= 100)
+    document.addEventListener("mousemove", onMove)
+    return () => document.removeEventListener("mousemove", onMove)
   }, [])
 
   useEffect(() => {
@@ -66,50 +54,32 @@ export function SiteHeader() {
   }, [isScrolling, isHoveringTop, isMenuOpen])
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(true)
-    }, 100)
+    const timer = setTimeout(() => setIsVisible(true), 100)
     return () => clearTimeout(timer)
   }, [])
 
   return (
     <>
       <header
-        className="fixed top-0 w-full flex items-center justify-center transition-all duration-500 ease-out z-50 shadow-sm"
+        className="fixed top-0 left-0 right-0 z-50 shadow-sm transition-all duration-500 ease-out"
+        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px))" }}
       >
-        <div
-          className="w-full  flex items-center justify-between text-black/90 px-4 sm:px-6 lg:px-8  bg-[#F6F7F9]"
-        >
+        <div className="w-full flex items-center justify-between bg-[#F6F7F9] text-black/90 
+                        px-4 sm:px-6 lg:px-8 py-2 sm:py-3 md:py-2">
           <Link
-            href="/home"
+            href="/"
             className="flex items-center gap-2 font-light text-lg sm:text-xl transition-all duration-300 ease-out hover:scale-105 hover:text-black"
           >
-            <img src="/logo.png" alt="Advart Logo" className="w-11 h-11 sm:w-16 sm:h-16 object-contain" />
+            <img src="/logo-1.png" alt="Advart Logo" className="w-11 h-11 sm:w-16 sm:h-16 object-contain" />
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex gap-4 lg:gap-6 items-center justify-center flex-grow py-4">
+          <nav className="hidden md:flex gap-4 lg:gap-6 items-center justify-center flex-grow">
             {[
-              {
-                href: "/home",
-                label: "Home",
-                delay: "delay-100",
-              },
-              {
-                href: "/aboutus",
-                label: "About us",
-                delay: "delay-200",
-              },
-              {
-                href: "/careers",
-                label: "Careers",
-                delay: "delay-300",
-              },
-              {
-                href: "/contactus",
-                label: "Contact Us",
-                delay: "delay-500",
-              },
+              { href: "/", label: "Home", delay: "delay-100" },
+              { href: "/aboutus", label: "About", delay: "delay-200" },
+              { href: "/careers", label: "Careers", delay: "delay-300" },
+              { href: "/contactus", label: "Contact", delay: "delay-500" },
             ].map((item) => (
               <div
                 key={item.href}
@@ -125,94 +95,88 @@ export function SiteHeader() {
             ))}
           </nav>
 
-          {/* Mobile menu button */}
+          {/* Mobile: animated hamburger */}
           <button
             onClick={toggleMenu}
-            className="md:hidden p-2 hover:bg-white/20 rounded-lg transition-all duration-300 ease-out touch-manipulation hover:scale-110 active:scale-95"
+            className={`md:hidden p-3 rounded-lg transition-all duration-300 ease-out active:scale-95
+                       ${isMenuOpen ? "rotate-90" : "rotate-0"}`}
             aria-label="Toggle navigation menu"
             aria-expanded={isMenuOpen}
+            aria-controls="mobile-menu"
           >
-            <div className="transition-transform duration-300 ease-out">
-              {isMenuOpen ? (
-                <X className="h-5 w-5 sm:h-6 sm:w-6 text-black animate-in spin-in-180 duration-300" />
-              ) : (
-                <Menu className="h-5 w-5 sm:h-6 sm:w-6 text-black" />
-              )}
+            <div className="relative h-6 w-6">
+              <Menu className={`absolute inset-0 h-6 w-6 text-black transition-opacity duration-200 ${isMenuOpen ? "opacity-0" : "opacity-100"}`} />
+              <X className={`absolute inset-0 h-6 w-6 text-black transition-opacity duration-200 ${isMenuOpen ? "opacity-100" : "opacity-0"}`} />
             </div>
           </button>
         </div>
 
-        {/* Mobile menu */}
+        {/* Mobile menu overlay */}
         <div
-          className={`fixed inset-0 z-[100] transition-all duration-500 ease-out ${
-            isMenuOpen ? "opacity-100 visible" : "opacity-0 invisible"
-          } md:hidden`}
+          id="mobile-menu"
+          className={`md:hidden fixed inset-0 z-[100] transition-opacity duration-300
+            ${isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
           style={{
-            background: "rgba(255, 255, 255, 0.95)",
-            backdropFilter: "blur(40px) saturate(200%)",
-            WebkitBackdropFilter: "blur(40px) saturate(200%)",
+            background: "rgba(255,255,255,0.92)",
+            backdropFilter: "blur(24px) saturate(160%)",
+            WebkitBackdropFilter: "blur(24px) saturate(160%)",
           }}
+          aria-hidden={!isMenuOpen}
         >
-          <button
-            onClick={toggleMenu}
-            className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-200 transition-all duration-300 ease-out z-10 hover:scale-110 active:scale-95 hover:rotate-90"
-            aria-label="Close navigation menu"
-          >
-            <X className="h-6 w-6 text-black" />
-          </button>
-
-          <div
-            className={`flex flex-col items-center justify-center min-h-screen w-full px-6 py-20 bg-white text-black transition-all duration-500 ease-out ${
-              isMenuOpen ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-            }`}
-          >
-            <Link
-              href="/home"
-              className={`font-bold text-2xl mb-16 transition-all duration-300 ease-out hover:scale-110 ${
-                isMenuOpen ? "animate-in zoom-in-50 duration-600 delay-200" : ""
-              }`}
+          <div className="relative h-full w-full">
+            {/* Close button */}
+            <button
               onClick={toggleMenu}
+              className="absolute right-4 p-3 rounded-full hover:bg-gray-200 transition active:scale-95 pointer-events-auto z-[200]"
+              style={{ top: "calc(env(safe-area-inset-top, 0px) + 8px)" }}
+              aria-label="Close navigation menu"
             >
-              Advart
-            </Link>
+              <X className="h-6 w-6 text-black" />
+            </button>
 
-            <nav className="flex flex-col items-center gap-8 text-center mb-16">
-              {[
-                {
-                  href: "/home",
-                  label: "Home",
-                  delay: "delay-300",
-                },
-                {
-                  href: "/aboutus",
-                  label: "About us",
-                  delay: "delay-400",
-                },
-                {
-                  href: "/careers",
-                  label: "Careers",
-                  delay: "delay-500",
-                },
-                {
-                  href: "/contactus",
-                  label: "Contact Us",
-                  delay: "delay-600",
-                },
-              ].map((item) => (
-                <div
-                  key={item.href}
-                  className={`${isMenuOpen ? `animate-in slide-in-from-right-8 fade-in duration-500 ${item.delay}` : "opacity-0 translate-x-8"}`}
-                >
+            {/* Sliding panel */}
+            <div
+              className={`absolute inset-0 flex flex-col items-center justify-center w-full
+                          px-6 pt-20 pb-12 text-black transform transition-all duration-300
+                          ${isMenuOpen ? "translate-y-0 opacity-100 scale-100" : "translate-y-4 opacity-0 scale-[0.99]"}`}
+              style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 5rem)" }}
+            >
+              {/* Logo inside mobile menu */}
+              <Link
+                href="/"
+                onClick={toggleMenu}
+                className={`mb-14 transition-transform duration-200 hover:scale-105
+                            ${isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1"}`}
+                style={{ transitionDelay: "80ms" }}
+                aria-label="Go to home"
+              >
+                <img
+                  src="/logo-1.png"
+                  alt="Advart Logo"
+                  className="w-20 h-20 sm:w-24 sm:h-24 object-contain"
+                />
+              </Link>
+
+              <nav className="flex flex-col items-center gap-8 text-center">
+                {[
+                  { href: "/", label: "Home" },
+                  { href: "/aboutus", label: "About us" },
+                  { href: "/careers", label: "Careers" },
+                  { href: "/contactus", label: "Contact Us" },
+                ].map((item, i) => (
                   <Link
+                    key={item.href}
                     href={item.href}
                     onClick={toggleMenu}
-                    className="text-2xl font-medium hover:underline underline-offset-4 transition-all duration-300 ease-out hover:scale-105 hover:-translate-y-1"
+                    className={`text-2xl font-medium transition-all duration-300 hover:scale-105
+                                ${isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
+                    style={{ transitionDelay: `${120 * (i + 2)}ms` }}
                   >
                     {item.label}
                   </Link>
-                </div>
-              ))}
-            </nav>
+                ))}
+              </nav>
+            </div>
           </div>
         </div>
       </header>

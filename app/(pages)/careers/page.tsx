@@ -2,17 +2,15 @@ import Link from "next/link"
 import { fetchJobs } from "@/lib/jobs"
 import OpenApplicationForm from "@/components/open-application-form"
 
-
 export default async function CareersPage() {
   const jobs = await fetchJobs()
 
   return (
-    <main className="min-h-screen bg-[#F6F7F9] text-black py-12 md:py-20">
+    <main className="min-h-screen bg-[#F6F7F9] text-black mt-24 py-12 md:py-20">
       <div className="container mx-auto px-4 md:px-6">
         <section className="text-center mb-16 md:mb-24">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Whom are we <span className="text-[#ffdc38] ">looking</span> for? 
-            {/* <span className="text-black"></span> */}
+            Whom are we <span className="text-[#ffdc38]">looking</span> for?
           </h1>
           <p className="text-lg md:text-xl max-w-2xl mx-auto">
             Creatively Hungry and Unapologetically Adamant Hoomans!
@@ -39,9 +37,16 @@ export default async function CareersPage() {
                 </header>
 
                 {job.jd && (
-                  <p className="mt-2 line-clamp-4">
-                    {job.jd}
-                  </p>
+                  <div className="mt-2 line-clamp-4 overflow-hidden">
+                    <ul className="list-disc list-inside space-y-2">
+                      {job.jd
+                        .replace("Key Responsibilities:", "") // remove prefix
+                        .split("•") // split by bullet
+                        .map((point: string, index: number) =>
+                          point.trim() ? <li key={index}>{point.trim()}</li> : null
+                        )}
+                    </ul>
+                  </div>
                 )}
 
                 <Link

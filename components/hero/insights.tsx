@@ -8,10 +8,10 @@ type Insight = {
 
 export default function Insights() {
   const insights: Insight[] = [
-    { icon: "/hero/insights/bar.svg",           text: "20x Revenue Growth", description: "Scaled an e-commerce business from 5x sales to 20x." },
-    { icon: "/hero/insights/ranking.svg",       text: "231k Followers",     description: "Grew from 1K to 231k followers in record time." },
-    { icon: "/hero/insights/net-butterfly.svg", text: "3M Views",           description: "Generated over 3 million reel views organically." },
-    { icon: "/hero/insights/paper.svg",         text: "Category Expansion", description: "Consulted an e-commerce brand to scale from 2 to 25 product categories" },
+    { icon: "/hero/insights/bar.svg",           text: "100k+ Monthly Visitors", description: "BeeLittle attracts over 100,000 website visitors every month." },
+    { icon: "/hero/insights/ranking.svg",       text: "1,600+ Product Variants", description: "BeeLittle scaled to 1,600 SKUs across 300+ variants." },
+    { icon: "/hero/insights/net-butterfly.svg", text: "22k Instagram Followers", description: "Zing Clothing’s @zingclothing.in counts 22,000 followers on Instagram." },
+    { icon: "/hero/insights/paper.svg",         text: "8× Collection Growth",   description: "Prathiksham expanded seasonal collections from 2 to 8 in one year." },
   ]
 
   return (
@@ -20,8 +20,8 @@ export default function Insights() {
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 pt-8 sm:pt-10 md:pt-12 pb-10 sm:pb-12 md:pb-14">
         <div className="bg-[#F6F7F9] text-black rounded-2xl">
           <div className="max-w-6xl w-full mx-auto">
-            {/* Desktop / Large screens (no sticky, no min-h-screen) */}
-            <div className="hidden lg:grid lg:grid-cols-2 items-center gap-12 xl:gap-16   ">
+            {/* Desktop / Large screens */}
+            <div className="hidden lg:grid lg:grid-cols-2 items-center gap-12 xl:gap-16">
               <div className="flex flex-col items-center justify-center text-center">
                 <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-light mb-4 leading-tight">
                   Based on <span className="font-semibold">True Impact</span>
@@ -52,7 +52,7 @@ export default function Insights() {
               </div>
             </div>
 
-            {/* Mobile / Tablet (simple grid, no auto-scroll) */}
+            {/* Mobile / Tablet */}
             <div className="lg:hidden p-6 sm:p-8">
               <div className="text-center mb-6 sm:mb-8">
                 <h2 className="text-xl xs:text-xl sm:text-2xl md:text-3xl font-light">

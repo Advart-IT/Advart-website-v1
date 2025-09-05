@@ -67,7 +67,7 @@ const Strategy = () => {
     }
   }, [])
 
-  const strategyText =
+  const strategyText =  
     "Data is at the heart of everything we do, powered by creative fuel that sparks the impact you crave for your brand's growth."
   const words = strategyText.split(" ")
 
@@ -77,19 +77,18 @@ const Strategy = () => {
         <div className="relative overflow-hidden bg-black text-white">
           <div className="max-w-4xl w-full mx-auto text-center relative z-10 py-12 sm:py-14 md:py-16 px-6">
             {/* Heading */}
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight text-white mb-4">
-              Our Strategy
-            </h2>
-
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-normal tracking-tight text-white pb-2 md:pb-4">
+          Our <span className="font-semibold">Strategy</span>
+        </h2>
             {/* Subheading (animated line) */}
             <div
               ref={textRef}
-              className="text-base sm:text-lg md:text-xl font-medium leading-tight"
+              className="text-sm sm:text-base leading-relaxed text-gray-200 max-w-3xl mx-auto lg:text-lg"
             >
               {words.map((word, index) => (
                 <span
                   key={index}
-                  className="reveal-word inline-block mr-3 mb-2"
+                  className="reveal-word inline-block mr-1 mb-1"
                   style={{
                     opacity: 0.3,
                     color: "rgb(100, 100, 100)",

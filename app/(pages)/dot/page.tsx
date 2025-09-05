@@ -1,31 +1,66 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Play, X, ArrowRight, CheckCircle, Zap, Users, BarChart3 } from "lucide-react"
+import { useEffect, useMemo, useState } from "react";
+import { Play, X, ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+
+function resolveAsset(path: string, basePath = "") {
+  // Ensure exactly one slash between basePath and path
+  if (basePath && basePath !== "/") {
+    return `${basePath.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
+  }
+  return path;
+}
+
+function useVideoSrc(srcWebm: string, srcMp4?: string) {
+  const [chosen, setChosen] = useState(srcWebm);
+
+  useEffect(() => {
+    const v = document.createElement("video");
+    const canWebm = !!v.canPlayType && v.canPlayType("video/webm; codecs=vp9,vorbis") !== "";
+    if (canWebm) {
+      setChosen(srcWebm);
+    } else if (srcMp4) {
+      setChosen(srcMp4);
+    } else {
+      setChosen(srcWebm); // fallback to whatever we have
+    }
+  }, [srcWebm, srcMp4]);
+
+  return chosen;
+}
 
 function VideoInline({
-  src,
+  srcWebm,
+  srcMp4,
   onExpand,
   label,
   poster,
 }: {
-  src: string
-  onExpand: () => void
-  label: string
-  poster?: string
+  srcWebm: string;
+  srcMp4?: string;
+  onExpand: () => void;
+  label: string;
+  poster?: string;
 }) {
+  const chosen = useVideoSrc(srcWebm, srcMp4);
+
   return (
     <div className="relative overflow-hidden group hover:shadow-xl transition-all duration-500 bg-white/50 backdrop-blur-sm border border-gray-300 rounded-lg shadow-lg w-full h-full">
       <div className="relative w-full h-[52vw] max-h-[420px] lg:h-[420px] overflow-hidden rounded-lg">
         <video
-          src={src}
+          key={chosen}           // ensures re-render when source changes
           muted
           loop
           autoPlay
           playsInline
+          preload="metadata"
           poster={poster}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-        />
+        >
+          <source src={srcWebm} type="video/webm" />
+          {srcMp4 ? <source src={srcMp4} type="video/mp4" /> : null}
+        </video>
 
         <button
           type="button"
@@ -42,28 +77,35 @@ function VideoInline({
         </button>
       </div>
     </div>
-  )
+  );
 }
 
 export default function DotPage() {
-  const [showVideo, setShowVideo] = useState(false)
-  const [videoSrc, setVideoSrc] = useState<string | null>(null)
+  const [showVideo, setShowVideo] = useState(false);
+  const [videoSrc, setVideoSrc] = useState<string | null>(null);
+  const router = useRouter();
+
+  // If you deploy under a subpath (Next.js basePath), expose it via env:
+  // e.g. NEXT_PUBLIC_BASE_PATH="/your-subsite"
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setShowVideo(false)
-    window.addEventListener("keydown", onKey)
-    return () => window.removeEventListener("keydown", onKey)
-  }, [])
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setShowVideo(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const openVideo = (src: string) => {
-    setVideoSrc(src)
-    setShowVideo(true)
-  }
+    setVideoSrc(src);
+    setShowVideo(true);
+  };
+  const closeVideo = () => setShowVideo(false);
 
-  const closeVideo = () => setShowVideo(false)
-
-  const socialWEBM = "/dot/dot-social.webm"
-  const dataWEBM = "/dot/dot-data.webm"
+  // Match your folder: public/dot/dot-*.webm (and optional mp4 fallbacks)
+  const socialWEBM = resolveAsset("/dot/dot-social.webm", basePath);
+  const socialMP4  = resolveAsset("/dot/dot-social.mp4", basePath); // add this file for Safari
+  const dataWEBM   = resolveAsset("/dot/dot-data.webm", basePath);
+  const dataMP4    = resolveAsset("/dot/dot-data.mp4", basePath);   // add this file for Safari
 
   return (
     <div className="min-h-screen bg-[#F6F7F9] text-black py-12 md:py-20">
@@ -72,14 +114,10 @@ export default function DotPage() {
         <section className="text-center mb-16 md:mb-24">
           <div className="space-y-4">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Do It With{" "}
-              <span className="text-[#ffdc38]">
-                DOT
-              </span>
+              Do It With <span className="text-[#ffdc38]">DOT</span>
             </h1>
             <p className="text-lg md:text-xl max-w-2xl mx-auto">
-              Made for Agencies & Businesses that value <span className="font-semibold">Clarity</span> over
-              Confusion
+              Made for Agencies & Businesses that value <span className="font-semibold">Clarity</span> over Confusion
             </p>
           </div>
 
@@ -103,7 +141,12 @@ export default function DotPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               {/* Video */}
               <div className="lg:col-span-7">
-                <VideoInline src={socialWEBM} onExpand={() => openVideo(socialWEBM)} label="Dot Social Media" />
+                <VideoInline
+                  srcWebm={socialWEBM}
+                  srcMp4={socialMP4}
+                  onExpand={() => openVideo(socialWEBM)}
+                  label="Dot Social Media"
+                />
               </div>
 
               {/* Content */}
@@ -160,17 +203,20 @@ export default function DotPage() {
                   <p className="text-lg">
                     Advanced analytics and insights to power your business decisions.
                   </p>
-                  <div >
-                    <p className="text-black font-semibold text-center">
-                     Coming Soon...
-                    </p>
+                  <div>
+                    <p className="text-black font-semibold text-center">Coming Soon...</p>
                   </div>
                 </div>
               </div>
 
               {/* Video */}
               <div className="lg:col-span-7 order-1 lg:order-2">
-                <VideoInline src={dataWEBM} onExpand={() => openVideo(dataWEBM)} label="Dot Data" />
+                <VideoInline
+                  srcWebm={dataWEBM}
+                  srcMp4={dataMP4}
+                  onExpand={() => openVideo(dataWEBM)}
+                  label="Dot Data"
+                />
               </div>
             </div>
           </div>
@@ -192,10 +238,15 @@ export default function DotPage() {
               <X className="w-8 h-8" />
             </button>
 
-            <video src={videoSrc} autoPlay controls className="w-full h-full rounded-lg bg-black shadow-2xl" />
+            <video autoPlay controls className="w-full h-full rounded-lg bg-black shadow-2xl">
+              <source src={videoSrc} type="video/webm" />
+              {/* Fallback if user clicked WEBM on a Safari device */}
+              {videoSrc.includes("dot-social") && <source src={socialMP4} type="video/mp4" />}
+              {videoSrc.includes("dot-data") && <source src={dataMP4} type="video/mp4" />}
+            </video>
           </div>
         </div>
       )}
     </div>
-  )
+  );
 }

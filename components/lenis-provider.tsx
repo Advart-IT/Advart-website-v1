@@ -1,55 +1,46 @@
 "use client"
 
-import { createContext, useContext, useEffect, useRef, type ReactNode } from "react"
-import Lenis from "@studio-freight/lenis"
-
-type LenisContextValue = { lenis: Lenis | null }
-const LenisContext = createContext<LenisContextValue>({ lenis: null })
-
-export function useLenis() {
-  return useContext(LenisContext).lenis
-}
+import { useEffect, useState, type ReactNode } from "react"
+// Core Lenis (no React wrapper) — version-safe.
+import Lenis from "lenis"
 
 export default function LenisProvider({ children }: { children: ReactNode }) {
-  const lenisRef = useRef<Lenis | null>(null)
-  const rafRef = useRef<number | null>(null)
+  const [enabled, setEnabled] = useState(false)
 
   useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.1,
-      smoothWheel: true,
-      smoothTouch: false,
-      gestureDirection: "vertical",
-    })
-    lenisRef.current = lenis
-
-    const raf = (t: number) => {
-      lenis.raf(t)
-      rafRef.current = requestAnimationFrame(raf)
-    }
-    rafRef.current = requestAnimationFrame(raf)
-
-    // optional: restore scroll on route changes if using Next App Router
-    const onHash = () => {
-      const hash = decodeURIComponent(window.location.hash.replace("#", ""))
-      if (!hash) return
-      const el = document.getElementById(hash)
-      if (el) lenis.scrollTo(el, { lock: true })
-    }
-    window.addEventListener("hashchange", onHash, false)
-    onHash()
-
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
-      window.removeEventListener("hashchange", onHash)
-      lenis.destroy()
-      lenisRef.current = null
-    }
+    // Respect reduced motion; enable only for mouse/trackpad
+    const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false
+    const pointerFine = window.matchMedia?.("(pointer: fine)")?.matches ?? false
+    setEnabled(pointerFine && !prefersReduced)
   }, [])
 
-  return (
-    <LenisContext.Provider value={{ lenis: lenisRef.current }}>
-      {children}
-    </LenisContext.Provider>
-  )
+  useEffect(() => {
+    if (!enabled) return
+
+    const lenis = new Lenis({
+       duration: 1.2,
+  easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+  orientation: "vertical",
+  gestureOrientation: "vertical",
+  smoothWheel: true,
+  wheelMultiplier: 1,
+  touchMultiplier: 2,
+  infinite: false,
+    })
+
+    let rafId = 0
+    const raf = (time: number) => {
+      lenis.raf(time)
+      rafId = requestAnimationFrame(raf)
+    }
+    rafId = requestAnimationFrame(raf)
+
+    return () => {
+      cancelAnimationFrame(rafId)
+      // @ts-ignore - lenis may not expose a destroy type in some versions
+      lenis.destroy?.()
+    }
+  }, [enabled])
+
+  return <>{children}</>
 }

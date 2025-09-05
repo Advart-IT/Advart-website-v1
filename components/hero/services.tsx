@@ -1,7 +1,6 @@
 "use client"
 
-import type React from "react"
-import { useState, useEffect } from "react"
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react"
 
 interface Card {
   title: string
@@ -13,7 +12,7 @@ interface Card {
 }
 
 /** Reusable ReadMore component */
-function ReadMore({
+const ReadMore = React.memo(function ReadMore({
   text,
   maxChars = 120,
   onReadMore,
@@ -26,15 +25,20 @@ function ReadMore({
   const isOverflow = text.length > maxChars
   if (!isOverflow) return <>{text}</>
 
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation()
+      if (onReadMore) onReadMore()
+      else setExpanded((v) => !v)
+    },
+    [onReadMore]
+  )
+
   return (
     <>
       {expanded ? text : `${text.slice(0, maxChars)}… `}
       <button
-        onClick={(e) => {
-          e.stopPropagation()
-          if (onReadMore) onReadMore()
-          else setExpanded((v) => !v)
-        }}
+        onClick={handleClick}
         className="underline underline-offset-2 font-medium hover:text-black transition-colors"
         aria-label="Read more"
       >
@@ -42,111 +46,150 @@ function ReadMore({
       </button>
     </>
   )
-}
+})
 
 export default function ServicesSection() {
   const [active, setActive] = useState<Card | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isFlipping, setIsFlipping] = useState(false)
 
-  const words = ["Digital Marketing", "Brand Growth", "Performance Ads"]
+  const words = useMemo(
+    () => ["Digital Marketing", "Brand Growth", "Performance Ads"],
+    []
+  )
   const interval = 2500
 
-  // --- NEW: lock rotating word width to widest word ---
+  // --- Lock rotating word width to widest word (persistent hidden probe) ---
   const [maxWordW, setMaxWordW] = useState<number | null>(null)
-  useEffect(() => {
-    const measure = () => {
-      const probe = document.createElement("span")
-      probe.style.visibility = "hidden"
-      probe.style.position = "absolute"
-      probe.style.left = "-9999px"
-      // same classes as the rotating word so media queries apply
-      probe.className =
-        "font-semibold text-black whitespace-nowrap text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight"
-      document.body.appendChild(probe)
+  const probeRef = useRef<HTMLSpanElement | null>(null)
 
-      let max = 0
-      for (const w of words) {
-        probe.textContent = w
-        max = Math.max(max, probe.offsetWidth)
-      }
-      setMaxWordW(max)
-      document.body.removeChild(probe)
+  const measure = useCallback(() => {
+    const probe = probeRef.current
+    if (!probe) return
+    let max = 0
+    for (const w of words) {
+      probe.textContent = w
+      // force sync measure (only when called on resize/orientation/font load)
+      const width = probe.offsetWidth
+      if (width > max) max = width
     }
+    setMaxWordW(max || null)
+  }, [words])
 
-    measure()
-    window.addEventListener("resize", measure)
-    window.addEventListener("orientationchange", measure)
+  useEffect(() => {
+    // Create a single hidden probe element once
+    const probe = document.createElement("span")
+    probe.style.visibility = "hidden"
+    probe.style.position = "absolute"
+    probe.style.left = "-9999px"
+    // same classes as the rotating word so media queries apply
+    probe.className =
+      "font-semibold text-black whitespace-nowrap text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight"
+    document.body.appendChild(probe)
+    probeRef.current = probe
+
+    // Initial measure after fonts load & next frame to be safe
+    let raf = requestAnimationFrame(measure)
+    // If the browser supports it, re-measure after fonts are ready
+    ;(document as any).fonts?.ready?.then(() => measure()).catch(() => {})
+
+    const onResize = () => measure()
+    window.addEventListener("resize", onResize, { passive: true })
+    window.addEventListener("orientationchange", onResize, { passive: true })
+
     return () => {
-      window.removeEventListener("resize", measure)
-      window.removeEventListener("orientationchange", measure)
+      cancelAnimationFrame(raf)
+      window.removeEventListener("resize", onResize)
+      window.removeEventListener("orientationchange", onResize)
+      probe.remove()
+      probeRef.current = null
     }
-  }, []) // words are static; if you change them, add `words` to deps
-  // -----------------------------------------------------
+  }, [measure])
+  // ------------------------------------------------------------------------
 
+  // Rotating word interval (unchanged visuals)
   useEffect(() => {
-    const timer = setInterval(() => {
+    const timer = window.setInterval(() => {
       setIsFlipping(true)
-      setTimeout(() => {
+      const t = window.setTimeout(() => {
         setCurrentIndex((prevIndex) => (prevIndex + 1) % words.length)
         setIsFlipping(false)
       }, 300)
+      return () => window.clearTimeout(t)
     }, interval)
-    return () => clearInterval(timer)
+
+    return () => window.clearInterval(timer)
   }, [words.length, interval])
 
-  const cards: Card[] = [
-    {
-      title: "Social Media Marketing",
-      iconPath: "/hero/services/bulb.svg",
-      tooltip:
-        "We help brands grow loyal communities that: Love your content, Spread your brand name organically, Drive real conversions through trust and engagement...",
-      src: "/hero/services/Social Media Marketing.jpg",
-      ctaLink: "#",
-      content: () => (
-        <p>
-          Because when a community truly believes in you, they don't just like your posts... they become your customers.
-        </p>
-      ),
-    },
-    {
-      title: "Performance Marketing",
-      iconPath: "/hero/services/boomerang.svg",
-      tooltip:
-        "Our performance marketing is driven by ROI and powered by data, with real-time analytics at its core. From conversion optimisation to precisely targeted campaigns, we focus on acquiring the right customers and delivering measurable growth.",
-      src: "/hero/services/Performance Marketing.jpg",
-      ctaLink: "#",
-      content: () => (
-        <p>
-          With a strategic multi-channel approach, every move is designed to scale impact, maximise returns and drive
-          revenue that lasts.
-        </p>
-      ),
-    },
-    {
-      title: "Business Consulting",
-      iconPath: "/hero/services/puzzle.svg",
-      tooltip:
-        "Whether it's expanding your brand globally or growing meaningfully as a homegrown business, we specialise in providing strategic consultation that eliminates operational chaos & strengthens brand visibility.",
-      src: "/hero/services/Business Consulting.jpg",
-      ctaLink: "#",
-      content: () => <p></p>,
-    },
-    {
-      title: "Branding & Designing",
-      iconPath: "/hero/services/sling.svg",
-      tooltip:
-        "All our branding is rooted in research and audience insights, ensuring your brand voice stays consistent and powerful.",
-      src: "/hero/services/Branding & Designing.jpg",
-      ctaLink: "#",
-      content: () => (
-        <p>
-          From packaging to billboards, we design with consumer psychology in mind... creating not just moments, but
-          memories that last.
-        </p>
-      ),
-    },
-  ]
+  const cards: Card[] = useMemo(
+    () => [
+      {
+        title: "Social Media Marketing",
+        iconPath: "/hero/services/bulb.svg",
+        tooltip:
+          "We help brands grow loyal communities that: Love your content, Spread your brand name organically, Drive real conversions through trust and engagement...",
+        src: "/hero/services/Social Media Marketing.jpg",
+        ctaLink: "#",
+        content: () => (
+          <p>
+            Because when a community truly believes in you, they don't just like your posts... they
+            become your customers.
+          </p>
+        ),
+      },
+      {
+        title: "Performance Marketing",
+        iconPath: "/hero/services/boomerang.svg",
+        tooltip:
+          "Our performance marketing is driven by ROI and powered by data, with real-time analytics at its core. From conversion optimisation to precisely targeted campaigns, we focus on acquiring the right customers and delivering measurable growth.",
+        src: "/hero/services/Performance Marketing.jpg",
+        ctaLink: "#",
+        content: () => (
+          <p>
+            With a strategic multi-channel approach, every move is designed to scale impact,
+            maximise returns and drive revenue that lasts.
+          </p>
+        ),
+      },
+      {
+        title: "Business Consulting",
+        iconPath: "/hero/services/puzzle.svg",
+        tooltip:
+          "Whether it's expanding your brand globally or growing meaningfully as a homegrown business, we specialise in providing strategic consultation that eliminates operational chaos & strengthens brand visibility.",
+        src: "/hero/services/Business Consulting.jpg",
+        ctaLink: "#",
+        content: () => <p></p>,
+      },
+      {
+        title: "Branding & Designing",
+        iconPath: "/hero/services/sling.svg",
+        tooltip:
+          "All our branding is rooted in research and audience insights, ensuring your brand voice stays consistent and powerful.",
+        src: "/hero/services/Branding & Designing.jpg",
+        ctaLink: "#",
+        content: () => (
+          <p>
+            From packaging to billboards, we design with consumer psychology in mind... creating not
+            just moments, but memories that last.
+          </p>
+        ),
+      },
+    ],
+    []
+  )
+
+  const handleCardClick = useCallback((card: Card) => setActive(card), [])
+  const handleCloseModal = useCallback(() => setActive(null), [])
+
+  // (Optional small UX nicety—doesn't affect visuals): close on ESC
+  useEffect(() => {
+    if (!active) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") handleCloseModal()
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [active, handleCloseModal])
 
   return (
     <section id="services" className=" scroll-mt-24 md:scroll-mt-32">
@@ -164,10 +207,9 @@ export default function ServicesSection() {
 
                   {/* Fixed-width wrapper using maxWordW */}
                   <span
-  className="relative inline-block align-baseline overflow-hidden font-semibold text-black whitespace-nowrap text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight"
-  style={{ width: maxWordW ? `${maxWordW}px` : undefined, display: "inline-block" }}
->
-
+                    className="relative inline-block align-baseline overflow-hidden font-semibold text-black whitespace-nowrap text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight"
+                    style={{ width: maxWordW ? `${maxWordW}px` : undefined, display: "inline-block" }}
+                  >
                     <span className={`${isFlipping ? "animate-slide-up-out" : "animate-slide-up-in"} block`}>
                       {words[currentIndex]}
                     </span>
@@ -196,7 +238,7 @@ export default function ServicesSection() {
               {cards.map((card, index) => (
                 <div key={index} className="relative">
                   <div
-                    onClick={() => setActive(card)}
+                    onClick={() => handleCardClick(card)}
                     className="w-full rounded-xl sm:rounded-2xl border border-gray-300 bg-white cursor-pointer overflow-hidden p-6 hover:shadow-lg transition-shadow duration-200"
                     title={card.tooltip}
                   >
@@ -208,7 +250,7 @@ export default function ServicesSection() {
                       <div className="text-center">
                         <h3 className="text-base sm:text-lg font-semibold mb-3">{card.title}</h3>
                         <p className="text-black/70 text-sm sm:text-base leading-relaxed">
-                          <ReadMore text={card.tooltip} maxChars={120} onReadMore={() => setActive(card)} />
+                          <ReadMore text={card.tooltip} maxChars={120} onReadMore={() => handleCardClick(card)} />
                         </p>
                       </div>
                     </div>
@@ -224,7 +266,7 @@ export default function ServicesSection() {
               {cards.map((card, index) => (
                 <div key={index} className="relative">
                   <div
-                    onClick={() => setActive(card)}
+                    onClick={() => handleCardClick(card)}
                     className="w-full rounded-2xl border border-black/10 bg-white cursor-pointer p-6 min-h-72 flex items-center justify-center hover:shadow-lg transition-shadow duration-200"
                     title={card.tooltip}
                   >
@@ -234,7 +276,7 @@ export default function ServicesSection() {
                       </div>
                       <h3 className="text-lg font-semibold mb-3">{card.title}</h3>
                       <p className="text-black/70 text-sm">
-                        <ReadMore text={card.tooltip} maxChars={120} onReadMore={() => setActive(card)} />
+                        <ReadMore text={card.tooltip} maxChars={120} onReadMore={() => handleCardClick(card)} />
                       </p>
                     </div>
                   </div>
@@ -246,11 +288,11 @@ export default function ServicesSection() {
           {/* Modal */}
           {active && (
             <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" role="dialog" aria-modal="true">
-              <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setActive(null)} />
+              <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleCloseModal} />
               <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col min-h-0 transform transition-all duration-300 ease-out scale-100 opacity-100">
                 <div className="absolute top-4 right-4 z-10">
                   <button
-                    onClick={() => setActive(null)}
+                    onClick={handleCloseModal}
                     className="flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-lg hover:bg-white transition-colors"
                     aria-label="Close modal"
                   >

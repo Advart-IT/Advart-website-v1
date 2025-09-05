@@ -22,7 +22,6 @@ export default function ContactSection() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
-    // Prepare the form data
     const formData = new FormData()
     formData.append("access_key", "18b6b803-4a45-414b-a7f1-6f462b766023") // Replace with your access key
     formData.append("firstName", form.firstName)
@@ -32,12 +31,9 @@ export default function ContactSection() {
     formData.append("reason", form.reason)
     formData.append("message", form.message)
 
-    // Set the email subject based on the 'reason' selected in the dropdown
     const subject = `Inquiry: ${form.reason ? form.reason : "No specific reason"}`
-
     formData.append("subject", subject)
 
-    // Send data to Web3Forms API
     try {
       const response = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
@@ -59,13 +55,13 @@ export default function ContactSection() {
     "h-11 w-full px-3 text-sm border rounded-md border-gray-300 bg-white text-black focus:outline-none"
 
   return (
-    <div className="bg-[#F6F7F9]">
+    <div className="bg-[#F6F7F9] mt-24">  {/* 👈 added top margin */}
       <section className="mx-auto max-w-6xl px-4 md:px-0 py-10 md:py-14 text-black">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:items-stretch">
-          {/* Left: image (no crop) */}
+          {/* Left: image */}
           <div className="relative rounded-xl md:h-[520px] h-64 overflow-hidden">
             <img
-              src="/contact/spotlight.png"
+              src="/contact/boat-1.png"
               alt="Contact illustration"
               className="absolute inset-0 w-full h-full object-contain object-center"
             />
@@ -165,7 +161,7 @@ export default function ContactSection() {
                 </select>
               </div>
 
-              {/* Row 4: Message (Optional) */}
+              {/* Row 4 */}
               <div className="space-y-2 flex-1 flex flex-col">
                 <label htmlFor="message" className="block text-sm font-medium text-black">
                   Message
@@ -181,7 +177,7 @@ export default function ContactSection() {
                 />
               </div>
 
-              {/* Row 5: Button */}
+              {/* Row 5 */}
               <button
                 type="submit"
                 className="w-full rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-white hover:text-black border border-black focus:outline-none focus:ring-2 focus:ring-black disabled:opacity-50"

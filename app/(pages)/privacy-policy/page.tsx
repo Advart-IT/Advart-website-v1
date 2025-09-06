@@ -91,7 +91,7 @@ export default function PrivacyPolicyPage() {
             <h2 className="text-xl font-semibold">Contact Us</h2>
             <address className="not-italic">
               <strong>Advart</strong><br />
-              14/548-3, Thiyaki Kumaran Street, Punjai Puliampatti, Sathyamangalam Taluk, Erode-638459<br />
+              Registered Address: 14/548-3, Thiyaki Kumaran Street, Punjai Puliampatti, Sathyamangalam Taluk, Erode-638459<br />
               Email: <a className="underline" href="mailto:[your@email.com]">digital@advartit.in</a><br />
               Phone: + 91 96005 06015
             </address>

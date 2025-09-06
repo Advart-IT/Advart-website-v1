@@ -28,7 +28,7 @@ export default function Insights() {
                 </h2>
                 <div className="relative w-full overflow-hidden rounded-2xl grid place-items-center">
                   <img
-                    src="/hero/insights/nc-ranking.png"
+                    src="/hero/insights/man-star.webp"
                     alt="Insights hero"
                     className="w-64 md:w-80 h-auto object-contain pt-4"
                   />
@@ -60,7 +60,7 @@ export default function Insights() {
                 </h2>
                 <div className="relative mx-auto mt-4 mb-6 w-full overflow-hidden rounded-2xl grid place-items-center">
                   <img
-                    src="/hero/insights/nc-ranking.png"
+                    src="/hero/insights/man-star.webp"
                     alt="Insights hero"
                     className="w-48 sm:w-56 h-auto object-contain"
                   />

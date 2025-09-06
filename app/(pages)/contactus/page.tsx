@@ -61,7 +61,7 @@ export default function ContactSection() {
           {/* Left: image */}
           <div className="relative rounded-xl md:h-[520px] h-64 overflow-hidden">
             <img
-              src="/contact/boat-1.png"
+              src="/contact/boat.webp"
               alt="Contact illustration"
               className="absolute inset-0 w-full h-full object-contain object-center"
             />

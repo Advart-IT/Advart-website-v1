@@ -58,14 +58,14 @@ export default function AboutPage() {
 
                 <div className="space-y-3 text-base text-gray-600">
                   <p>
-                    We come from the land where they say "Vaanga Poonga" — the most
+                    We come from the land where they say "Vaanga Poonga", the most
                     respectful city in Tamil Nadu, Coimbatore. Our team, drawn from
                     across India, speaks the language of data, strategy and growth,
                     which translates into creative impact!
                   </p>
                   <p>
                     We happily take on projects across packaging, design, social media
-                    marketing, performance marketing, business consulting — anything
+                    marketing, performance marketing, business consulting... Anything
                     your brand needs, our team knows exactly what to do!
                   </p>
                 </div>
@@ -74,7 +74,7 @@ export default function AboutPage() {
               {/* Lighthouse hidden on mobile, visible only on lg+ */}
               <div className="lg:col-span-5 flex lg:justify-end">
                 <img
-                  src="/aboutus/lighthouse.png"
+                  src="/aboutus/lighthouse.webp"
                   alt="Lighthouse illustration"
                   className="hidden lg:block w-full max-w-[360px] md:max-w-[420px] object-contain p-4 lg:p-6 mx-auto lg:mx-0"
                 />
@@ -105,7 +105,7 @@ export default function AboutPage() {
 
             <div className="relative max-w-4xl mx-auto rounded-2xl overflow-hidden shadow-lg">
               <img
-                src="/aboutus/team.JPG"
+                src="/aboutus/team.webp"
                 alt="Our Creative Team"
                 className="w-full h-auto object-cover filter grayscale"
               />

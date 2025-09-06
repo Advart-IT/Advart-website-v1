@@ -1,27 +1,27 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
-import { gsap } from "gsap";
+import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
-const greetings = ["• வணக்கம்", "• ഹലോ", "• Hello"];
+const greetings = ["• வணக்கம்", "• ഹലോ", "• Hello", "• नमस्ते"];
 
 interface GreetingsProps {
   onComplete: () => void;
+  speed?: number; // duration per greeting in ms
+  exitDelay?: number; // delay before finish after last greeting
 }
 
-export default function Greetings({ onComplete }: GreetingsProps) {
+export default function Greetings({ onComplete, speed = 500, exitDelay = 300 }: GreetingsProps) {
   const [index, setIndex] = useState(0);
   const [show, setShow] = useState(true);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
 
-  // Check if we should show greeting at all
+  // Lock scroll & avoid scroll restore during intro
   useEffect(() => {
-    const shouldShowGreeting = document.documentElement.getAttribute('data-intro') === '1';
-    if (!shouldShowGreeting) {
-      setShow(false);
-      onComplete();
-      return;
-    }
+    const prevOverflow = document.body.style.overflow;
+    const prevScrollRestoration = history.scrollRestoration;
+
+    document.body.style.overflow = "hidden";
+    history.scrollRestoration = "manual";
+    window.scrollTo({ top: 0 });
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") finish();
@@ -29,112 +29,78 @@ export default function Greetings({ onComplete }: GreetingsProps) {
     window.addEventListener("keydown", onKey);
 
     return () => {
+      document.body.style.overflow = prevOverflow || "";
+      history.scrollRestoration = prevScrollRestoration || "auto";
       window.removeEventListener("keydown", onKey);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Animate text changes with GSAP
+  // Step through the greetings, then finish
   useEffect(() => {
-    if (!show || !textRef.current) return;
-
-    // Animate in the new greeting
-    gsap.fromTo(textRef.current, 
-      { 
-        opacity: 0, 
-        y: 30,
-        scale: 0.8
-      },
-      { 
-        opacity: 1, 
-        y: 0,
-        scale: 1,
-        duration: 0.8,
-        ease: "back.out(1.4)"
-      }
-    );
-
-    // Set up next greeting or finish
-    const timer = setTimeout(() => {
-      if (index < greetings.length - 1) {
-        // Animate out current greeting
-        gsap.to(textRef.current, {
-          opacity: 0,
-          y: -30,
-          scale: 0.8,
-          duration: 0.5,
-          ease: "power2.in",
-          onComplete: () => setIndex(prev => prev + 1)
-        });
-      } else {
-        // Final greeting shown, prepare to finish
-        setTimeout(() => finish(), 1200);
-      }
-    }, index < greetings.length - 1 ? 1400 : 0);
-
-    return () => clearTimeout(timer);
+    if (index < greetings.length) {
+      const t = setTimeout(() => setIndex((p) => p + 1), speed);
+      return () => clearTimeout(t);
+    } else {
+      const t = setTimeout(() => finish(), exitDelay);
+      return () => clearTimeout(t);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index, show]);
+  }, [index, speed, exitDelay]);
 
   function finish() {
-    if (!containerRef.current) return;
+    setShow(false);
 
-    // Create timeline for ultra-smooth slide-up reveal
-    const tl = gsap.timeline({
-      onComplete: () => {
-        // Clean up after animation - unlock scroll and remove overlay
-        const root = document.documentElement;
-        root.removeAttribute("data-intro");
-        
-        // Restore normal scrolling
-        document.body.style.overflow = "";
-        document.body.style.position = "";
-        document.body.style.width = "";
-        document.body.style.height = "";
+    // Wait for the slide-up animation to complete before cleaning up
+    setTimeout(() => {
+      // Reveal the app shell after animation
+      const root = document.documentElement;
+      root.removeAttribute("data-intro");
+      document.body.style.overflow = "";
 
-        // Clean up base style
-        const base = document.getElementById("advart-base-style");
-        if (base && base.parentNode) base.parentNode.removeChild(base);
+      // Make the shell visible now (in case the head script didn't add the "visible" style)
+      const app = document.getElementById("__advart_app");
+      if (app) app.style.visibility = "visible";
 
-        setShow(false);
-        onComplete();
-      }
-    });
+      // Clean up the base style if present (optional)
+      const base = document.getElementById("advart-base-style");
+      if (base && base.parentNode) base.parentNode.removeChild(base);
 
-    // Ultra-smooth slide-up animation - content is already ready underneath!
-    tl.to(containerRef.current, {
-      y: "-100vh",
-      duration: 1.4,
-      ease: "power4.inOut"
-    })
-    // Simultaneous fade for extra smoothness
-    .to(containerRef.current, {
-      opacity: 0,
-      duration: 1,
-      ease: "power3.out"
-    }, "-=0.6"); // Start fade earlier for seamless transition
+      onComplete();
+    }, 600); // Match the exit animation duration
   }
 
-  if (!show) return null;
-
   return (
-    <div
-      ref={containerRef}
-      style={styles.container}
-      aria-modal
-      role="dialog"
-    >
-      <div
-        ref={textRef}
-        style={{ color: "#FFDC38", ...styles.text }}
-        className="font-normal"
-      >
-        {greetings[index] || ""}
-      </div>
-      
-      {/* Optional: Add a subtle pattern or gradient for visual interest */}
-      <div style={styles.backgroundPattern} />
-    </div>
+    <AnimatePresence mode="wait">
+      {show && (
+        <motion.div
+          key="container"
+          initial={{ y: 0 }}
+          exit={{
+            y: "-100vh",
+            transition: {
+              duration: 0.6,
+              ease: [0.4, 0.0, 0.2, 1],
+            },
+          }}
+          style={styles.container}
+          aria-modal
+          role="dialog"
+        >
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.3 }}
+            style={{ color: "#FFDC38", ...styles.text }}
+            className="font-normal"
+          >
+            {greetings[index]}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
@@ -148,24 +114,9 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: "center",
     fontSize: "2.5rem",
     fontWeight: "bold",
-    zIndex: 10000, // Higher than content
-    willChange: "transform, opacity",
+    zIndex: 9999,
   },
   text: {
-    willChange: "transform, opacity",
     textAlign: "center",
-    userSelect: "none",
-    position: "relative",
-    zIndex: 1,
-  },
-  backgroundPattern: {
-    position: "absolute",
-    inset: 0,
-    opacity: 0.03,
-    background: `
-      radial-gradient(circle at 25% 25%, #FFDC38 0%, transparent 50%),
-      radial-gradient(circle at 75% 75%, #FFDC38 0%, transparent 50%)
-    `,
-    pointerEvents: "none",
   },
 };

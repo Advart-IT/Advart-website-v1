@@ -288,14 +288,16 @@ export default function HeroSection() {
                       </span>
                     </h1>
 
-                    <div className="block md:hidden mb-6">
-                      <Image src="/hero/team-2.webp" alt="Mobile only visual" width={400} height={300} className="mx-auto w-68 sm:w-72 h-auto" />
-                    </div>
+                    
 
                     <div className="mt-6 ">
                       <a href="/contactus" className="inline-flex items-center justify-center px-5 py-2.5 rounded-md bg-black text-white hover:bg-white hover:text-black border border-black shadow-sm transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-black">
                         Contact Us
                       </a>
+                    </div>
+
+                    <div className="block md:hidden ">
+                      <Image src="/hero/team-2.webp" alt="Mobile only visual" width={400} height={300} className="mx-auto w-68 sm:w-72 h-auto" />
                     </div>
                   </div>
                 </div>

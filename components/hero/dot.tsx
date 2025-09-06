@@ -70,7 +70,7 @@ function Tabs({
       {/* Content area with fixed height */}
       <div
         className={cn(
-          "mt-8 relative w-full aspect-video md:h-[36rem] rounded-2xl overflow-hidden",
+          "mt-8 relative w-full aspect-video md:h-[36rem] rounded-md overflow-hidden",
           contentClassName
         )}
       >

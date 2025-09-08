@@ -126,7 +126,7 @@ const GsapStackScroll: React.FC = () => {
 
       const st = ScrollTrigger.create({
         trigger: wrapRef.current!,
-        start: "top top",
+        start: "top 5%",
         end: `+=${window.innerHeight * Math.max(cards.length - 1, 1)}`,
         pin: true,
         pinSpacing: true,
@@ -243,21 +243,23 @@ const GsapStackScroll: React.FC = () => {
 
 export default function AdvartSection() {
   return (
-    <section id="advart" className="scroll-mt-24 md:scroll-mt-32">
-      <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 md:px-8 lg:px-12 xl:px-16">
-        <div className="flex flex-col items-center justify-center text-black bg-[#F6F7F9] rounded-xl sm:rounded-2xl">
-          <section className="w-full px-3 sm:px-6 lg:px-8 pt-5 sm:pt-8">
+    <section id="advart" className="section scroll-mt-24 md:scroll-mt-32">
+      <div className="section-container pb-0">
+        <div className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl">
+          {/* Top copy */}
+          <section className="w-full">
             <div className="max-w-6xl mx-auto text-center">
-              <h2 className="text-sm sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-light mb-2.5 sm:mb-4 leading-tight">
+              <h2 className="heading2 pb-1">
                 All exciting things we do at <span className="font-semibold">Advart...</span>
               </h2>
-              <p className="text-xs sm:text-base text-black/70 leading-relaxed font-light whitespace-pre-line max-w-xs sm:max-w-xl lg:max-w-2xl mx-auto">
+              <p className="paragraph mx-auto text-center whitespace-pre-line">
                 From scaling a brand from ₹30K to ₹3Cr, to building a homegrown brand like Zing, to creating many more
                 meaningful brand stories… We love doing it all, while nailing it right!
               </p>
             </div>
           </section>
 
+          {/* Scroller (unchanged) */}
           <div className="w-full">
             <GsapStackScroll />
           </div>
@@ -266,3 +268,4 @@ export default function AdvartSection() {
     </section>
   )
 }
+

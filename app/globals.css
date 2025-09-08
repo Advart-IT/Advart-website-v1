@@ -97,15 +97,3 @@ body::-webkit-scrollbar {
   display: none;
 }
 
-
-
-/* Hide the app shell when the intro should show (set before paint) */
-html[data-intro="1"] .app-shell {
-  visibility: hidden;          /* prevents layout shift */
-}
-
-html[data-intro="1"] body {
-  overflow: hidden;            /* belt & suspenders */
-}
-
-/* When intro is done (we remove data-intro), the shell becomes visible */

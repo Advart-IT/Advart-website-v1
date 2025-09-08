@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react"
+import { AnimatePresence, motion } from "framer-motion"
 
 interface Card {
   title: string
@@ -10,6 +11,64 @@ interface Card {
   ctaLink: string
   content: (() => React.ReactNode) | React.ReactNode
 }
+
+/** ------- static data (prevents re-creation on every render) ------- */
+const WORDS = ["Digital Marketing", "Brand Performance", "Performance Ads"] as const
+const ROTATE_INTERVAL = 2500
+
+const CARDS: Card[] = [
+  {
+    title: "Social Media Marketing",
+    iconPath: "/hero/services/bulb.webp",
+    tooltip:
+      "We help brands grow loyal communities that: Love your content, Spread your brand name organically, Drive real conversions through trust and engagement...",
+    src: "/hero/services/Social Media Marketing.webp",
+    ctaLink: "#",
+    content: () => (
+      <p>
+        Because when a community truly believes in you, they don't just like your posts... they
+        become your customers.
+      </p>
+    ),
+  },
+  {
+    title: "Performance Marketing",
+    iconPath: "/hero/services/boomerang.webp",
+    tooltip:
+      "Our performance marketing is driven by ROI and powered by data, with real-time analytics at its core. From conversion optimisation to precisely targeted campaigns, we focus on acquiring the right customers and delivering measurable growth.",
+    src: "/hero/services/Performance Marketing.webp",
+    ctaLink: "#",
+    content: () => (
+      <p>
+        With a strategic multi-channel approach, every move is designed to scale impact, maximise
+        returns and drive revenue that lasts.
+      </p>
+    ),
+  },
+  {
+    title: "Business Consulting",
+    iconPath: "/hero/services/puzzle.webp",
+    tooltip:
+      "Whether it's expanding your brand globally or growing meaningfully as a homegrown business, we specialise in providing strategic consultation that eliminates operational chaos & strengthens brand visibility.",
+    src: "/hero/services/Business Consulting.webp",
+    ctaLink: "#",
+    content: () => <p></p>,
+  },
+  {
+    title: "Branding & Designing",
+    iconPath: "/hero/services/sling.webp",
+    tooltip:
+      "All our branding is rooted in research and audience insights, ensuring your brand voice stays consistent and powerful.",
+    src: "/hero/services/Branding & Designing.webp",
+    ctaLink: "#",
+    content: () => (
+      <p>
+        From packaging to billboards, we design with consumer psychology in mind... creating not
+        just moments, but memories that last.
+      </p>
+    ),
+  },
+]
 
 /** Reusable ReadMore component (always shows the button) */
 const ReadMore = React.memo(function ReadMore({
@@ -33,8 +92,7 @@ const ReadMore = React.memo(function ReadMore({
     [onReadMore]
   )
 
-  const displayText =
-    expanded || !isOverflow ? text : `${text.slice(0, maxChars)}… `
+  const displayText = expanded || !isOverflow ? text : `${text.slice(0, maxChars)}… `
 
   return (
     <>
@@ -53,15 +111,10 @@ const ReadMore = React.memo(function ReadMore({
 export default function ServicesSection() {
   const [active, setActive] = useState<Card | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [isFlipping, setIsFlipping] = useState(false)
 
-  const words = useMemo(
-    () => ["Digital Marketing", "Brand Performance", "Performance Ads"],
-    []
-  )
-  const interval = 2500
+  const words = useMemo(() => WORDS, [])
 
-  // --- Lock rotating word width ---
+  /** --- Lock rotating word width (probe matches typography) --- */
   const [maxWordW, setMaxWordW] = useState<number | null>(null)
   const probeRef = useRef<HTMLSpanElement | null>(null)
 
@@ -83,11 +136,12 @@ export default function ServicesSection() {
     probe.style.position = "absolute"
     probe.style.left = "-9999px"
     probe.className =
-      "font-semibold text-black whitespace-nowrap text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight"
+      // match heading font size/weight (line-height doesn't affect width)
+      "font-semibold text-black whitespace-nowrap text-lg sm:text-xl md:text-2xl lg:text-3xl leading-none"
     document.body.appendChild(probe)
     probeRef.current = probe
 
-    let raf = requestAnimationFrame(measure)
+    const raf = requestAnimationFrame(measure)
     ;(document as any).fonts?.ready?.then(() => measure()).catch(() => {})
 
     const onResize = () => measure()
@@ -102,78 +156,15 @@ export default function ServicesSection() {
       probeRef.current = null
     }
   }, [measure])
-  // ---------------------------------
+  /** ----------------------------------------------------------------- */
 
-  // Rotating word interval
+  // Rotate word with one interval (smooth)
   useEffect(() => {
-    const timer = window.setInterval(() => {
-      setIsFlipping(true)
-      const t = window.setTimeout(() => {
-        setCurrentIndex((prevIndex) => (prevIndex + 1) % words.length)
-        setIsFlipping(false)
-      }, 300)
-      return () => window.clearTimeout(t)
-    }, interval)
-
-    return () => window.clearInterval(timer)
-  }, [words.length, interval])
-
-  const cards: Card[] = useMemo(
-    () => [
-      {
-        title: "Social Media Marketing",
-        iconPath: "/hero/services/bulb.webp",
-        tooltip:
-          "We help brands grow loyal communities that: Love your content, Spread your brand name organically, Drive real conversions through trust and engagement...",
-        src: "/hero/services/Social Media Marketing.webp",
-        ctaLink: "#",
-        content: () => (
-          <p>
-            Because when a community truly believes in you, they don't just like
-            your posts... they become your customers.
-          </p>
-        ),
-      },
-      {
-        title: "Performance Marketing",
-        iconPath: "/hero/services/boomerang.webp",
-        tooltip:
-          "Our performance marketing is driven by ROI and powered by data, with real-time analytics at its core. From conversion optimisation to precisely targeted campaigns, we focus on acquiring the right customers and delivering measurable growth.",
-        src: "/hero/services/Performance Marketing.webp",
-        ctaLink: "#",
-        content: () => (
-          <p>
-            With a strategic multi-channel approach, every move is designed to
-            scale impact, maximise returns and drive revenue that lasts.
-          </p>
-        ),
-      },
-      {
-        title: "Business Consulting",
-        iconPath: "/hero/services/puzzle.webp",
-        tooltip:
-          "Whether it's expanding your brand globally or growing meaningfully as a homegrown business, we specialise in providing strategic consultation that eliminates operational chaos & strengthens brand visibility.",
-        src: "/hero/services/Business Consulting.webp",
-        ctaLink: "#",
-        content: () => <p></p>,
-      },
-      {
-        title: "Branding & Designing",
-        iconPath: "/hero/services/sling.webp",
-        tooltip:
-          "All our branding is rooted in research and audience insights, ensuring your brand voice stays consistent and powerful.",
-        src: "/hero/services/Branding & Designing.webp",
-        ctaLink: "#",
-        content: () => (
-          <p>
-            From packaging to billboards, we design with consumer psychology in
-            mind... creating not just moments, but memories that last.
-          </p>
-        ),
-      },
-    ],
-    []
-  )
+    const id = window.setInterval(() => {
+      setCurrentIndex((i) => (i + 1) % words.length)
+    }, ROTATE_INTERVAL)
+    return () => clearInterval(id)
+  }, [words.length])
 
   const handleCardClick = useCallback((card: Card) => setActive(card), [])
   const handleCloseModal = useCallback(() => setActive(null), [])
@@ -188,128 +179,91 @@ export default function ServicesSection() {
   }, [active, handleCloseModal])
 
   return (
-    <section id="services" className=" scroll-mt-24 md:scroll-mt-32">
-      <div
-        className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16
-                   pt-8 sm:pt-10 md:pt-12 pb-10 sm:pb-12 md:pb-14"
-      >
-        <div className="flex flex-col items-center justify-center text-black bg-[#F6F7F9] rounded-2xl">
+    <section id="services" className="section">
+      <div className="section-container">
+        <div>
           {/* Heading */}
-          <section className="w-full mb-6 sm:mb-8">
-            <div className="max-w-6xl mx-auto">
-              <h2 className="text-center text-lg sm:text-xl md:text-2xl lg:text-3xl font-light leading-tight">
-                <span className="inline-flex items-baseline justify-center gap-2">
-                  <span>Trusted in</span>
+          <section>
+            <div>
+              {/* nudge keeps baseline perfect after giving more room for descenders */}
+              <h2
+                className="heading2 text-center leading-none"
+                style={{ ["--baseline-nudge" as any]: "-0.10em" }} // tweak between -0.12em..-0.04em if needed
+              >
+                <span className="whitespace-nowrap leading-none">
+                  <span className="leading-none">Trusted in&nbsp;</span>
+
+                  {/* OUTER: inline-block aligns on real baseline */}
                   <span
-                    className="relative inline-block align-baseline overflow-hidden text-left font-semibold text-black whitespace-nowrap text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight"
+                    className="inline-block leading-none text-left"
                     style={{
-                      width: maxWordW ? `${maxWordW}px` : undefined,
-                      display: "inline-block",
+                      verticalAlign: "var(--baseline-nudge)",
                     }}
                   >
+                    {/* INNER: descender-safe clip box */}
                     <span
-                      className={`${
-                        isFlipping
-                          ? "animate-slide-up-out"
-                          : "animate-slide-up-in"
-                      } block`}
+                      className="inline-block overflow-hidden leading-none"
+                      style={{
+                        width: maxWordW ? `${maxWordW}px` : "auto",
+                        height: "1.04em",       // extra room for g/j/p/y
+                        lineHeight: "1.2em",
+                        WebkitFontSmoothing: "antialiased",
+                        backfaceVisibility: "hidden",
+                        transform: "translateZ(0)",
+                        willChange: "transform, opacity",
+                        paddingBottom: "0.04em", // avoid jump on exit
+                      }}
                     >
-                      {words[currentIndex]}
+                      <AnimatePresence initial={false} mode="popLayout">
+                        <motion.span
+                          key={currentIndex}
+                          className="inline-block font-semibold text-black leading-none"
+                          initial={{ y: 22, opacity: 0, filter: "blur(2px)" }}
+                          animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                          exit={{ y: -22, opacity: 0, filter: "blur(2px)" }}
+                          transition={{ type: "spring", stiffness: 800, damping: 46, mass: 0.75 }}
+                          style={{ whiteSpace: "nowrap" }}
+                        >
+                          {words[currentIndex]}
+                        </motion.span>
+                      </AnimatePresence>
                     </span>
                   </span>
                 </span>
               </h2>
 
               <style jsx>{`
-                @keyframes slide-up-out {
-                  0% {
-                    transform: translateY(0%);
-                    opacity: 1;
+                @media (prefers-reduced-motion: reduce) {
+                  :global([data-motion-reduce]),
+                  :global(*[data-motion-reduce]) {
+                    transition: none !important;
+                    animation: none !important;
                   }
-                  100% {
-                    transform: translateY(-100%);
-                    opacity: 0;
-                  }
-                }
-                @keyframes slide-up-in {
-                  0% {
-                    transform: translateY(100%);
-                    opacity: 0;
-                  }
-                  100% {
-                    transform: translateY(0%);
-                    opacity: 1;
-                  }
-                }
-                .animate-slide-up-out {
-                  animation: slide-up-out 0.6s ease-in-out;
-                }
-                .animate-slide-up-in {
-                  animation: slide-up-in 0.6s ease-in-out;
                 }
               `}</style>
             </div>
           </section>
 
-          {/* Mobile Cards */}
-          <div className="lg:hidden w-full max-w-md px-2 sm:px-0">
-            <div className="flex flex-col gap-4 sm:gap-6">
-              {cards.map((card, index) => (
-                <div key={index} className="relative">
+          {/* Cards Grid (1 on mobile, 4 on desktop) */}
+          <div className="w-full max-w-6xl mx-auto px-2 sm:px-0">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
+              {CARDS.map((card) => (
+                <div key={card.title} className="relative">
                   <div
                     onClick={() => handleCardClick(card)}
-                    className="w-full rounded-xl sm:rounded-2xl border border-gray-300 bg-white cursor-pointer overflow-hidden p-6 hover:shadow-lg transition-shadow duration-200"
-                    title={card.tooltip}
-                  >
-                    <div className="flex flex-col items-center justify-center">
-                      <div className="flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full mb-4">
-                        <img
-                          src={card.iconPath || "/placeholder.svg"}
-                          alt={`${card.title} icon`}
-                          className="w-13 h-13"
-                        />
-                      </div>
-
-                      <div className="text-center">
-                        <h3 className="text-base sm:text-lg font-semibold mb-3">
-                          {card.title}
-                        </h3>
-                        <p className="text-black/70 text-sm sm:text-base leading-relaxed">
-                          <ReadMore
-                            text={card.tooltip}
-                            maxChars={120}
-                            onReadMore={() => handleCardClick(card)}
-                          />
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Desktop Cards */}
-          <div className="hidden lg:block w-full max-w-6xl px-4 lg:px-0">
-            <div className="grid grid-cols-4 gap-6">
-              {cards.map((card, index) => (
-                <div key={index} className="relative">
-                  <div
-                    onClick={() => handleCardClick(card)}
-                    className="w-full rounded-2xl border border-black/10 bg-white cursor-pointer p-6 min-h-72 flex items-center justify-center hover:shadow-lg transition-shadow duration-200"
-                    title={card.tooltip}
+                    className="w-full rounded-xl border border-black/10 bg-white cursor-pointer py-8 px-6 flex items-center justify-center hover:shadow-lg transition-shadow duration-200"
                   >
                     <div className="flex flex-col items-center text-center h-full justify-center">
-                      <div className="flex items-center justify-center w-14 h-14 rounded-full mb-5">
+                      <div className="flex items-center justify-center w-14 h-14 mb-5">
                         <img
-                          src={card.iconPath || "/placeholder.svg"}
+                          src={card.iconPath}
                           alt={`${card.title} icon`}
-                          className="w-18 h-18"
+                          className="max-w-full max-h-full"
+                          loading="lazy"
+                          decoding="async"
                         />
                       </div>
-                      <h3 className="text-lg font-semibold mb-3">
-                        {card.title}
-                      </h3>
+                      <h3 className="heading3 font-semibold">{card.title}</h3>
                       <p className="text-black/70 text-sm">
                         <ReadMore
                           text={card.tooltip}
@@ -350,11 +304,7 @@ export default function ServicesSection() {
                       stroke="currentColor"
                       strokeWidth={2}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M6 18L18 6M6 6l12 12"
-                      />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
                 </div>
@@ -364,11 +314,11 @@ export default function ServicesSection() {
                     src={active.src || "/placeholder.svg"}
                     alt={active.title}
                     className="w-full h-48 object-cover rounded-t-2xl"
+                    loading="lazy"
+                    decoding="async"
                   />
-                  <div className="p-6 pb-4">
-                    <h3 className="font-bold text-black text-xl text-center">
-                      {active.title}
-                    </h3>
+                  <div className="p-6 pb-2">
+                    <h3 className="heading3 font-semibold">{active.title}</h3>
                   </div>
                 </div>
 
@@ -378,9 +328,7 @@ export default function ServicesSection() {
                       {active.tooltip}
                     </div>
                     <div className="text-black/70 text-base leading-relaxed">
-                      {typeof active.content === "function"
-                        ? active.content()
-                        : active.content}
+                      {typeof active.content === "function" ? active.content() : active.content}
                     </div>
                   </div>
                 </div>

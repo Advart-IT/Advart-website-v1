@@ -25,7 +25,7 @@ export default function AboutPage() {
             />
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="px-4 sm:px-6 md:px-8 text-center">
-                <h1 className="heading1">
+                <h1 className="heading1 mt-10">
                   <span className="text-primary">Agency</span>{" "}
                   <span className="text-white">that creates the best of marketing talents!</span>
                 </h1>
@@ -37,7 +37,7 @@ export default function AboutPage() {
           <div className="section-container pt-0">
             <div className="max-w-6xl mx-auto lg:text-center">
               <div className="flex flex-col justify-center space-y-3 md:space-y-4">
-                <h2 className="heading2 pb-0 font-semibold">
+                <h2 className="heading1 pb-0 font-semibold">
                   And the love for <span className="text-primary">art</span> brought us here…
                 </h2>
 
@@ -60,11 +60,11 @@ export default function AboutPage() {
         <section className="section" style={{ contentVisibility: "auto", containIntrinsicSize: "700px" }}>
           <div className="section-container">
             <div className="max-w-6xl mx-auto lg:text-center">
-              <h2 className="heading2">
-                Meet the <span className="text-black">Team</span>
+              <h2 className="heading1 pb-0">
+                Meet the <span className="text-primary">Team</span>
               </h2>
 
-              <p className="paragraph fs-fluid-16-18 mb-6 md:mb-8 max-w-none">
+              <p className="paragraph fs-fluid-16-18 max-w-none">
                 Who's going to be working on your brand&apos;s growth.
               </p>
 

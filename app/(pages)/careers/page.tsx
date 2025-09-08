@@ -9,7 +9,7 @@ export default async function CareersPage() {
     <main className="min-h-screen bg-[#F6F7F9] text-black mt-24 py-12 md:py-20">
       <div className="container mx-auto px-4 md:px-6">
         <section className="text-center mb-16 md:mb-24">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+          <h1 className="heading1 font-bold mb-0">
             Whom are we <span className="text-[#ffdc38]">looking</span> for?
           </h1>
           <p className="text-lg md:text-xl max-w-2xl mx-auto">

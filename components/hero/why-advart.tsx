@@ -1,97 +1,111 @@
 "use client"
-
 import React, { memo } from "react"
 
-/* ---------- constants outside render (no per-render allocations) ---------- */
 const WHY_TEXT =
   "Because we see your brand's growth as our own… literally and figuratively. And as you know… Ads alone don't build brands. Design alone doesn't build communities. Strategy without execution doesn't build results. So at Advart, we give your brand everything it needs to breathe and grow. From business consulting to social media presence, we do the work that makes sales!"
 
-const MARQUEE_ITEMS = [
+const ITEMS = [
   "Performance → ROI that speaks",
   "Strategy → Plans that work",
   "Social → Communities that buy",
   "Consulting → Clarity that scales",
 ]
 
-// duplicate once for seamless loop (CSS anim shifts -50%)
-const MARQUEE = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS]
+const SEP = "•"
 
-/* -------------------------------- component -------------------------------- */
+// Create the marquee content with proper spacing
+function MarqueeContent() {
+  return (
+    <div className="inline-flex items-center whitespace-nowrap">
+      {ITEMS.map((text, idx) => (
+        <React.Fragment key={`item-${idx}`}>
+          <span className="text-white/30 text-lg font-medium">
+            {text}
+          </span>
+          <span className="mx-8 text-white/30 text-xl" aria-hidden="true">
+            {SEP}
+          </span>
+        </React.Fragment>
+      ))}
+    </div>
+  )
+}
+
 function WhyAdvartInner() {
   return (
-    <section id="why-advart" className="section bg-black w-full text-white">
-      <div
-        className="section-container text-center relative z-10"
-        // micro-optimization: keep offscreen work minimal when not visible
-        // (supported in modern browsers; ignored where unsupported)
-        style={{ contentVisibility: "auto", containIntrinsicSize: "600px" }}
-      >
+    <div className="bg-black">
+      <section>
+      <div className="section-container max-w-6xl text-center mb-0 pb-0">
         <h2 className="heading2 text-white">
           Why trust us with your <span className="font-semibold">brand?</span>
         </h2>
+        <p className="paragraph text-white/80 max-w-3xl mx-auto leading-relaxed">
+          {WHY_TEXT}
+        </p>
+      </div>
 
-        <p className="paragraph text-white/80 max-w-3xl mx-auto">{WHY_TEXT}</p>
-
-        <div className="w-full mt-6 sm:mt-8 md:mt-10 overflow-hidden relative mask-fade">
-          <div
-            className="flex animate-marquee whitespace-nowrap will-change-transform transform-gpu"
-            aria-hidden="true"
-          >
-            {MARQUEE.map((item, i) => (
-              <span
-                key={`${item}-${i}`}
-                className="paragraph text-white/70 mx-2 sm:mx-3 md:mx-4 lg:mx-6"
-              >
-                {item}
-              </span>
-            ))}
-          </div>
+      {/* Seamless Marquee Container */}
+      <div className="overflow-hidden section-container w-full max-w-full">
+        <div 
+          className="marquee-container flex"
+          style={{
+            width: 'max-content',
+            animation: 'marquee 30s linear infinite'
+          }}
+        >
+          {/* First instance */}
+          <MarqueeContent />
+          {/* Second instance for seamless loop */}
+          <MarqueeContent />
+          {/* Third instance to ensure no gaps */}
+          <MarqueeContent />
         </div>
       </div>
 
       <style jsx>{`
-        /* mask moved to CSS to avoid inline style re-parsing each render */
-        .mask-fade {
-          -webkit-mask-image: linear-gradient(
-            to right,
-            rgba(0, 0, 0, 0),
-            rgba(0, 0, 0, 1) 8%,
-            rgba(0, 0, 0, 1) 92%,
-            rgba(0, 0, 0, 0)
-          );
-          mask-image: linear-gradient(
-            to right,
-            rgba(0, 0, 0, 0),
-            rgba(0, 0, 0, 1) 8%,
-            rgba(0, 0, 0, 1) 92%,
-            rgba(0, 0, 0, 0)
-          );
+        .marquee-container {
+          will-change: transform;
+          backface-visibility: hidden;
         }
 
         @keyframes marquee {
           0% {
-            transform: translateX(0%);
+            transform: translate3d(0, 0, 0);
           }
           100% {
-            transform: translateX(-50%);
+            transform: translate3d(-33.333%, 0, 0);
           }
         }
-        .animate-marquee {
-          animation: marquee 25s linear infinite;
+
+        /* Pause on hover for better UX */
+        .marquee-container:hover {
+          animation-play-state: paused;
         }
 
-        /* Prefer less motion: halt the animation cleanly (no layout jump) */
+        /* Respect user's motion preferences */
         @media (prefers-reduced-motion: reduce) {
-          .animate-marquee {
-            animation: none;
-            transform: none;
+          .marquee-container {
+            animation: none !important;
+          }
+        }
+
+        /* Speed variations for different screen sizes */
+        @media (max-width: 768px) {
+          .marquee-container {
+            animation-duration: 20s;
+          }
+        }
+
+        @media (min-width: 1200px) {
+          .marquee-container {
+            animation-duration: 40s;
           }
         }
       `}</style>
     </section>
+    </div>
+    
   )
 }
 
-/* memo to avoid re-renders unless props change (none here) */
-const WhyAdvart = memo(WhyAdvartInner)
-export default WhyAdvart
+export default memo(WhyAdvartInner)

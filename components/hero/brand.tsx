@@ -132,11 +132,6 @@ const GsapStackScroll: React.FC = () => {
         pinSpacing: true,
         scrub: 1,
         animation: masterTL,
-        snap: {
-          snapTo: gsap.utils.snap(1 / Math.max(cards.length - 1, 1)),
-          duration: { min: 0.35, max: 0.7 },
-          ease: "power2.inOut",
-        },
         onUpdate(self) {
           const newIndex = Math.round(self.progress * (cards.length - 1))
           if (newIndex !== currentIndex) setCurrentIndex(newIndex)

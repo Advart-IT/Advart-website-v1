@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef } from "react"
 
-/* ------------------------------ VideoScrolling ----------------------------- */
 export default function VideoScrolling() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const videoWrapRef = useRef<HTMLDivElement>(null)
@@ -23,6 +22,7 @@ export default function VideoScrolling() {
   useEffect(() => {
     if (!videoWrapRef.current || reducedRef.current) return
     let cleanup = () => {}
+
     ;(async () => {
       const { gsap } = await import("gsap")
       const { ScrollTrigger } = await import("gsap/ScrollTrigger")
@@ -31,20 +31,41 @@ export default function VideoScrolling() {
       const wrap = videoWrapRef.current!
       gsap.set(wrap, { scale: 0.6 })
 
-      const anim = gsap.to(wrap, { scale: 1, ease: "none" })
-      const st = ScrollTrigger.create({
-        trigger: wrap,
-        start: "top 80%",
-        end: "center center",
-        scrub: 1,
-        animation: anim,
-      })
+      const mm = gsap.matchMedia()
+
+      mm.add(
+        {
+          desktop: "(min-width: 768px)",
+          mobile: "(max-width: 767px)",
+        },
+        (ctx) => {
+          const { mobile } = ctx.conditions!
+
+          const start = mobile ? "top 92%" : "top 80%"
+          const end = mobile ? "top 58%" : "center center" // earlier end on mobile
+          const scrub = mobile ? 0.5 : 1
+
+          const anim = gsap.to(wrap, { scale: 1, ease: "none" })
+          const st = ScrollTrigger.create({
+            trigger: wrap,
+            start,
+            end,
+            scrub,
+            animation: anim,
+          })
+
+          return () => {
+            st.kill()
+            anim.kill()
+          }
+        }
+      )
 
       cleanup = () => {
-        st.kill()
-        anim.kill()
+        mm.revert()
       }
     })()
+
     return () => cleanup()
   }, [])
 
@@ -60,8 +81,8 @@ export default function VideoScrolling() {
 
   return (
     <section id="video-scroll" className="section">
-      <div className="section-container">
-        <h2 className="heading2 text-center">
+      <div className="section-container pt-0">
+        <h2 className="heading2 pb-4 text-center">
           Building Brands <span className="font-semibold">Meaningfully</span>
         </h2>
 

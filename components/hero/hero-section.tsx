@@ -146,25 +146,25 @@ function TypeStable({
 export default function HeroSection() {
   return (
     <>
-      <section id="hero" className="scroll-mt-[80px]" style={{ marginTop: 88 }}>
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 pt-8 sm:pt-10 md:pt-12 pb-6 sm:pb-8 md:pb-10">
+      <section id="hero" style={{ marginTop: 88 }}>
+        <div className="section-container">
           <section className="w-full overflow-visible flex flex-col">
             <div className="relative isolate grid place-items-center">
-              <div className="grid grid-cols-1 md:grid-cols-[auto_1fr_auto] items-start justify-items-start gap-6 md:gap-8">
-                {/* Left image (desktop only) */}
+              <div className="grid grid-cols-1 md:grid-cols-[auto_1fr_auto] items-start justify-items-start">
+                {/* Left image (desktop only) - now uses a sized container + fill */}
                 <div
                   className="hidden md:block pointer-events-none select-none md:justify-self-start order-2 md:order-1"
                   aria-hidden="true"
                 >
-                  <Image
-                    src="/hero/girl.webp"
-                    alt=""
-                    width={360}
-                    height={360}
-                    loading="lazy"
-                    sizes="(min-width: 768px) 14rem, 0px"
-                    className="w-56 lg:w-64 xl:w-72 h-auto mt-20"
-                  />
+                  <div className="relative mt-20 w-36 lg:w-44 xl:w-52 aspect-square">
+                    <Image
+                      src="/hero/girl.webp"
+                      alt=""
+                      fill
+                      priority={false}
+                      className="object-contain"
+                    />
+                  </div>
                 </div>
 
                 {/* Center content */}
@@ -188,6 +188,27 @@ export default function HeroSection() {
                       </span>
                     </h1>
 
+                    {/* Mobile images FIRST */}
+                    <div className="mt-6 md:hidden flex items-start justify-center gap-16">
+                      <Image
+                        src="/hero/girl.webp"
+                        alt=""
+                        width={200}
+                        height={200}
+                        className="w-28 sm:w-36 h-auto"
+                        priority={false}
+                      />
+                      <Image
+                        src="/hero/target.webp"
+                        alt=""
+                        width={200}
+                        height={200}
+                        className="w-40 sm:w-36 h-auto"
+                        priority={false}
+                      />
+                    </div>
+
+                    {/* Button AFTER images on mobile */}
                     <div className="mt-6">
                       <a
                         href="/contactus"
@@ -196,21 +217,10 @@ export default function HeroSection() {
                         Contact Us
                       </a>
                     </div>
-
-                    {/* Mobile-only image */}
-                    <div className="block md:hidden">
-                      <Image
-                        src="/hero/team-2.webp"
-                        alt="Mobile only visual"
-                        width={400}
-                        height={300}
-                        className="mx-auto w-68 sm:w-72 h-auto"
-                      />
-                    </div>
                   </div>
                 </div>
 
-                {/* Right image (desktop only) */}
+                {/* Right image (desktop only) - unchanged */}
                 <div
                   className="hidden md:block pointer-events-none select-none md:justify-self-end order-3"
                   aria-hidden="true"

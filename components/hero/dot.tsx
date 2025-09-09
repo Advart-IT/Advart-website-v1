@@ -63,42 +63,43 @@ function Tabs({
     <>
       {/* Tab buttons */}
       <LayoutGroup id="dot-tabs">
-        <div
+  <div
+    className={cn(
+      "relative flex justify-center flex-wrap items-center gap-2 sm:gap-3 md:gap-4 w-full pt-4",
+      containerClassName
+    )}
+  >
+    {tabs.map((tab, idx) => {
+      const isActive = active.value === tab.value
+      return (
+        <motion.button
+          layout
+          key={tab.value}
+          onClick={() => switchTo(idx)}
           className={cn(
-            "relative inline-flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4 w-full",
-            containerClassName
+            "relative px-3 sm:px-4 py-1.5 sm:py-2 rounded-full leading-none border text-sm sm:text-base transition-colors",
+            "border-transparent",
+            isActive
+              ? cn("text-white", activeTabClassName)
+              : cn("text-black hover:text-gray-700", tabClassName)
           )}
+          aria-pressed={isActive}
         >
-          {tabs.map((tab, idx) => {
-            const isActive = active.value === tab.value
-            return (
-              <motion.button
-                layout
-                key={tab.value}
-                onClick={() => switchTo(idx)}
-                className={cn(
-                  "relative px-3 sm:px-4 py-1.5 sm:py-2 rounded-full leading-none border text-sm sm:text-base transition-colors",
-                  "border-transparent",
-                  isActive
-                    ? cn("text-white", activeTabClassName)
-                    : cn("text-black hover:text-gray-700", tabClassName)
-                )}
-                aria-pressed={isActive}
-              >
-                {isActive && (
-                  <motion.span
-                    layoutId="tab-pill"
-                    className="absolute inset-0 rounded-full bg-black transform-gpu"
-                    style={{ willChange: "transform, opacity" }}
-                    transition={{ type: "spring", stiffness: 400, damping: 30, mass: 0.4 }}
-                  />
-                )}
-                <span className="relative z-10">{tab.title}</span>
-              </motion.button>
-            )
-          })}
-        </div>
-      </LayoutGroup>
+          {isActive && (
+            <motion.span
+              layoutId="tab-pill"
+              className="absolute inset-0 rounded-full bg-black transform-gpu"
+              style={{ willChange: "transform, opacity" }}
+              transition={{ type: "spring", stiffness: 400, damping: 30, mass: 0.4 }}
+            />
+          )}
+          <span className="relative z-10">{tab.title}</span>
+        </motion.button>
+      )
+    })}
+  </div>
+</LayoutGroup>
+
 
       {/* Content area – responsive height driven by video */}
       <div className={cn("mt-6 sm:mt-8 relative w-full", contentClassName)}>

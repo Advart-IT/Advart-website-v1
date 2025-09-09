@@ -12,8 +12,8 @@ interface Card {
   content: (() => React.ReactNode) | React.ReactNode
 }
 
-/** ------- static data (prevents re-creation on every render) ------- */
-const WORDS = ["Digital Marketing", "Brand Performance", "Performance Ads"] as const
+/** Rotating words (no "g") */
+const WORDS = ["Market Reach", "Brand Success", "Performance Ads"] as const
 const ROTATE_INTERVAL = 2500
 
 const CARDS: Card[] = [
@@ -49,7 +49,7 @@ const CARDS: Card[] = [
     title: "Business Consulting",
     iconPath: "/hero/services/puzzle.webp",
     tooltip:
-      "Whether it's expanding your brand globally or growing meaningfully as a homegrown business, we specialise in providing strategic consultation that eliminates operational chaos & strengthens brand visibility.",
+      "Whether it's expandin your brand globally or rowin meaningfully as a homegrown business, we specialise in providin strategic consultation that eliminates operational chaos & strengthens brand visibility.",
     src: "/hero/services/Business Consulting.webp",
     ctaLink: "#",
     content: () => <p></p>,
@@ -58,19 +58,19 @@ const CARDS: Card[] = [
     title: "Branding & Designing",
     iconPath: "/hero/services/sling.webp",
     tooltip:
-      "All our branding is rooted in research and audience insights, ensuring your brand voice stays consistent and powerful.",
+      "All our brandin is rooted in research and audience insights, ensurin your brand voice stays consistent and powerful.",
     src: "/hero/services/Branding & Designing.webp",
     ctaLink: "#",
     content: () => (
       <p>
-        From packaging to billboards, we design with consumer psychology in mind... creating not
-        just moments, but memories that last.
+        From packain to billboards, we desin with consumer psychology in mind... creatin not just
+        moments, but memories that last.
       </p>
     ),
   },
 ]
 
-/** Reusable ReadMore component (always shows the button) */
+/** ReadMore */
 const ReadMore = React.memo(function ReadMore({
   text,
   maxChars = 120,
@@ -114,7 +114,7 @@ export default function ServicesSection() {
 
   const words = useMemo(() => WORDS, [])
 
-  /** --- Lock rotating word width (probe matches typography) --- */
+  /** Measure the widest rotating word to lock width */
   const [maxWordW, setMaxWordW] = useState<number | null>(null)
   const probeRef = useRef<HTMLSpanElement | null>(null)
 
@@ -136,8 +136,7 @@ export default function ServicesSection() {
     probe.style.position = "absolute"
     probe.style.left = "-9999px"
     probe.className =
-      // match heading font size/weight (line-height doesn't affect width)
-      "font-semibold text-black whitespace-nowrap text-lg sm:text-xl md:text-2xl lg:text-3xl leading-none"
+      "font-semibold text-black whitespace-nowrap text-lg sm:text-xl md:text-2xl lg:text-3xl"
     document.body.appendChild(probe)
     probeRef.current = probe
 
@@ -156,9 +155,8 @@ export default function ServicesSection() {
       probeRef.current = null
     }
   }, [measure])
-  /** ----------------------------------------------------------------- */
 
-  // Rotate word with one interval (smooth)
+  /** Rotate */
   useEffect(() => {
     const id = window.setInterval(() => {
       setCurrentIndex((i) => (i + 1) % words.length)
@@ -171,9 +169,7 @@ export default function ServicesSection() {
 
   useEffect(() => {
     if (!active) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") handleCloseModal()
-    }
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && handleCloseModal()
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
   }, [active, handleCloseModal])
@@ -182,69 +178,39 @@ export default function ServicesSection() {
     <section id="services" className="section">
       <div className="section-container">
         <div>
-          {/* Heading */}
+          {/* Heading — left aligned, baseline aligned, no scrollbars */}
           <section>
-            <div>
-              {/* nudge keeps baseline perfect after giving more room for descenders */}
-              <h2
-                className="heading2 text-center leading-none"
-                style={{ ["--baseline-nudge" as any]: "-0.10em" }} // tweak between -0.12em..-0.04em if needed
+            <h2 className="heading2 leading-relaxed flex items-baseline justify-center gap-2">
+              <span className="align-baseline">Trusted in</span>
+
+              {/* Clip-box sits on baseline; horizontal overflow hidden to avoid scrollbar */}
+              <span
+                className="inline-block font-semibold text-black align-baseline overflow-hidden"
+                style={{
+                  width: maxWordW ? `${maxWordW + 6}px` : "auto", // small buffer prevents last-letter cut
+                  height: "1.1em",                                 // room for descenders
+                  lineHeight: "1.1em",
+                  WebkitFontSmoothing: "antialiased",
+                }}
               >
-                <span className="whitespace-nowrap leading-none">
-                  <span className="leading-none">Trusted in&nbsp;</span>
-
-                  {/* OUTER: inline-block aligns on real baseline */}
-                  <span
-                    className="inline-block leading-none text-left"
-                    style={{
-                      verticalAlign: "var(--baseline-nudge)",
-                    }}
+                <AnimatePresence initial={false} mode="wait">
+                  <motion.span
+                    key={currentIndex}
+                    className="inline-block align-baseline"
+                    initial={{ y: "100%", opacity: 0, filter: "blur(2px)" }}
+                    animate={{ y: "0%", opacity: 1, filter: "blur(0px)" }}
+                    exit={{ y: "-100%", opacity: 0, filter: "blur(2px)" }}
+                    transition={{ type: "spring", stiffness: 700, damping: 44, mass: 0.75 }}
+                    style={{ whiteSpace: "nowrap" }}
                   >
-                    {/* INNER: descender-safe clip box */}
-                    <span
-                      className="inline-block overflow-hidden leading-none"
-                      style={{
-                        width: maxWordW ? `${maxWordW}px` : "auto",
-                        height: "1.04em",       // extra room for g/j/p/y
-                        lineHeight: "1.2em",
-                        WebkitFontSmoothing: "antialiased",
-                        backfaceVisibility: "hidden",
-                        transform: "translateZ(0)",
-                        willChange: "transform, opacity",
-                        paddingBottom: "0.04em", // avoid jump on exit
-                      }}
-                    >
-                      <AnimatePresence initial={false} mode="popLayout">
-                        <motion.span
-                          key={currentIndex}
-                          className="inline-block font-semibold text-black leading-none"
-                          initial={{ y: 22, opacity: 0, filter: "blur(2px)" }}
-                          animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
-                          exit={{ y: -22, opacity: 0, filter: "blur(2px)" }}
-                          transition={{ type: "spring", stiffness: 800, damping: 46, mass: 0.75 }}
-                          style={{ whiteSpace: "nowrap" }}
-                        >
-                          {words[currentIndex]}
-                        </motion.span>
-                      </AnimatePresence>
-                    </span>
-                  </span>
-                </span>
-              </h2>
-
-              <style jsx>{`
-                @media (prefers-reduced-motion: reduce) {
-                  :global([data-motion-reduce]),
-                  :global(*[data-motion-reduce]) {
-                    transition: none !important;
-                    animation: none !important;
-                  }
-                }
-              `}</style>
-            </div>
+                    {words[currentIndex]}
+                  </motion.span>
+                </AnimatePresence>
+              </span>
+            </h2>
           </section>
 
-          {/* Cards Grid (1 on mobile, 4 on desktop) */}
+          {/* Cards Grid */}
           <div className="w-full max-w-6xl mx-auto px-2 sm:px-0">
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
               {CARDS.map((card) => (
@@ -279,62 +245,76 @@ export default function ServicesSection() {
           </div>
 
           {/* Modal */}
-          {active && (
-            <div
-              className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-              role="dialog"
-              aria-modal="true"
-            >
-              <div
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-                onClick={handleCloseModal}
-              />
-              <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col min-h-0 transform transition-all duration-300 ease-out scale-100 opacity-100">
-                <div className="absolute top-4 right-4 z-10">
-                  <button
-                    onClick={handleCloseModal}
-                    className="flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-lg hover:bg-white transition-colors"
-                    aria-label="Close modal"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
+          {/* Modal */}
+{active && (
+  <div
+    className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div
+      className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+      onClick={handleCloseModal}
+    />
+    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col min-h-0 transform transition-all duration-300 ease-out scale-100 opacity-100">
+      {/* Close button */}
+      <div className="absolute top-4 right-4 z-10">
+        <button
+          onClick={handleCloseModal}
+          className="flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-lg hover:bg-white transition-colors"
+          aria-label="Close modal"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-5 h-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
 
-                <div className="flex-shrink-0">
-                  <img
-                    src={active.src || "/placeholder.svg"}
-                    alt={active.title}
-                    className="w-full h-48 object-cover rounded-t-2xl"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <div className="p-6 pb-2">
-                    <h3 className="heading3 font-semibold">{active.title}</h3>
-                  </div>
-                </div>
+      {/* Image + Title */}
+      <div className="flex-shrink-0">
+        <img
+          src={active.src || "/placeholder.svg"}
+          alt={active.title}
+          className="w-full h-48 object-cover rounded-t-2xl"
+          loading="lazy"
+          decoding="async"
+        />
+        <div className="p-6 pb-2">
+          <h3 className="heading3 font-semibold">{active.title}</h3>
+        </div>
+      </div>
 
-                <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 pb-6">
-                  <div className="space-y-4">
-                    <div className="text-black/70 text-base leading-relaxed whitespace-pre-line">
-                      {active.tooltip}
-                    </div>
-                    <div className="text-black/70 text-base leading-relaxed">
-                      {typeof active.content === "function" ? active.content() : active.content}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+      {/* Body */}
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 pb-6">
+        <div className="space-y-4">
+          <div className="text-black/70 text-base leading-relaxed whitespace-pre-line">
+            {active.tooltip}
+          </div>
+          <div className="text-black/70 text-base leading-relaxed">
+            {typeof active.content === "function" ? active.content() : active.content}
+          </div>
+        </div>
+      </div>
+
+      {/* Footer with Get in Touch button */}
+{/* Footer with simple link */}
+<div className="p-4 border-t border-gray-200 flex justify-end">
+  <a href="/contactus" className="text-blue-600 hover:underline">
+    Get in Touch
+  </a>
+</div>
+
+    </div>
+  </div>
+)}
+
         </div>
       </div>
     </section>

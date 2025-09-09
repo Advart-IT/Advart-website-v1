@@ -9,12 +9,11 @@ export default function AboutPage() {
           {/* Full-bleed hero image */}
           <div className="relative rounded-none md:rounded-2xl mb-8 overflow-hidden">
             <img
-              src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80"
-              alt="Creative team collaboration in black and white"
-              className="w-full h-64 md:h-80 object-cover filter grayscale brightness-110 contrast-125"
-              decoding="async"
-              fetchPriority="high"
-            />
+  src="https://images.unsplash.com/photo-1531297484001-80022131f5a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+  alt="Creative team collaboration"
+  className="w-full h-64 md:h-80 object-cover filter grayscale brightness-110 contrast-125"
+/>
+
             <div
               className="pointer-events-none absolute inset-0"
               aria-hidden="true"
@@ -25,7 +24,7 @@ export default function AboutPage() {
             />
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="px-4 sm:px-6 md:px-8 text-center">
-                <h1 className="heading1 mt-10">
+                <h1 className="heading1 mt-10 ">
                   <span className="text-primary">Agency</span>{" "}
                   <span className="text-white">that creates the best of marketing talents!</span>
                 </h1>
@@ -58,7 +57,7 @@ export default function AboutPage() {
 
         {/* TEAM SECTION */}
         <section className="section" style={{ contentVisibility: "auto", containIntrinsicSize: "700px" }}>
-          <div className="section-container">
+          <div className="section-container pt-0">
             <div className="max-w-6xl mx-auto lg:text-center">
               <h2 className="heading1 pb-0">
                 Meet the <span className="text-primary">Team</span>

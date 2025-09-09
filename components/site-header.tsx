@@ -1,153 +1,142 @@
 "use client"
 
 import Link from "next/link"
-import { useState, useEffect } from "react"
-import { Menu, X } from "lucide-react"
+import { useMemo, useEffect, useState } from "react"
+import { usePathname } from "next/navigation"
+
+type NavItem = { href: string; label: string }
 
 export function SiteHeader() {
+  const pathname = usePathname()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isVisible, setIsVisible] = useState(false)
-  const [showNavbar, setShowNavbar] = useState(false)
-  const [isScrolling, setIsScrolling] = useState(false)
-  const [isHoveringTop, setIsHoveringTop] = useState(false)
 
-  const toggleMenu = () => setIsMenuOpen((v) => !v)
+  const navItems: NavItem[] = useMemo(
+    () => [
+      { href: "/", label: "Home" },
+      { href: "/aboutus", label: "About" },
+      { href: "/careers", label: "Careers" },
+      { href: "/contactus", label: "Contact" },
+    ],
+    []
+  )
+
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname?.startsWith(href)
+
+  const toggleMenu = () => setIsMenuOpen(v => !v)
 
   // Lock body scroll when menu is open
   useEffect(() => {
     const { style } = document.body
     const prev = style.overflow
-    style.overflow = isMenuOpen ? "hidden" : prev || "auto"
+    if (isMenuOpen) style.overflow = "hidden"
     return () => { style.overflow = prev || "auto" }
   }, [isMenuOpen])
 
-  // Auto-close menu on desktop resize
+  // Auto-close menu on desktop resize (>=768px)
   useEffect(() => {
-    const onResize = () => {
-      if (window.innerWidth >= 768 && isMenuOpen) setIsMenuOpen(false)
-    }
+    const onResize = () => { if (window.innerWidth >= 768) setIsMenuOpen(false) }
     window.addEventListener("resize", onResize)
     return () => window.removeEventListener("resize", onResize)
-  }, [isMenuOpen])
-
-  // Scroll detection
-  useEffect(() => {
-    let t: ReturnType<typeof setTimeout>
-    const onScroll = () => {
-      setIsScrolling(true)
-      clearTimeout(t)
-      t = setTimeout(() => setIsScrolling(false), 1500)
-    }
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => { window.removeEventListener("scroll", onScroll); clearTimeout(t) }
-  }, [])
-
-  // Desktop: show when mouse near top
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => setIsHoveringTop(e.clientY <= 100)
-    document.addEventListener("mousemove", onMove)
-    return () => document.removeEventListener("mousemove", onMove)
-  }, [])
-
-  useEffect(() => {
-    setShowNavbar(isScrolling || isHoveringTop || isMenuOpen)
-  }, [isScrolling, isHoveringTop, isMenuOpen])
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 100)
-    return () => clearTimeout(timer)
   }, [])
 
   return (
-    <>
-      <header
-        className="fixed top-0 left-0 right-0 z-50 shadow-sm transition-all duration-500 ease-out"
-        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px))" }}
-      >
-        <div className="w-full flex items-center justify-between bg-[#F6F7F9] text-black/90 
-                        px-4 sm:px-6 lg:px-8 py-2 sm:py-3 md:py-2">
-          <Link
-            href="/"
-            className="flex items-center gap-2 font-light text-lg sm:text-xl transition-all duration-300 ease-out hover:scale-105 hover:text-black"
-          >
-            <img src="/logo-1.png" alt="Advart Logo" className="w-11 h-11 sm:w-16 sm:h-16 object-contain" />
-          </Link>
+    <header
+      className="fixed top-0 left-0 right-0 z-50 bg-[#F6F7F9] shadow-sm"
+      style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+    >
+      <div className="w-full flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2 sm:py-3 md:py-2 text-black/90">
+        {/* Left: Logo */}
+        <Link
+          href="/"
+          className="flex items-center gap-2 font-light text-lg sm:text-xl"
+          aria-label="Advart Home"
+        >
+          <img
+            src="/logo-1.png"
+            alt="Advart Logo"
+            className="w-11 h-11 sm:w-16 sm:h-16 object-contain"
+          />
+        </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex gap-4 lg:gap-6 items-center justify-center flex-grow">
-            {[
-              { href: "/", label: "Home", delay: "delay-100" },
-              { href: "/aboutus", label: "About", delay: "delay-200" },
-              { href: "/careers", label: "Careers", delay: "delay-300" },
-              { href: "/contactus", label: "Contact", delay: "delay-500" },
-            ].map((item) => (
-              <div
-                key={item.href}
-                className={`${isVisible ? `animate-in fade-in slide-in-from-bottom-2 duration-500 ${item.delay}` : "opacity-0"}`}
-              >
+        {/* Center: Desktop nav */}
+        <div className="hidden md:flex flex-1 justify-center">
+          <nav className="flex items-center gap-1">
+            {navItems.map((item) => {
+              const active = isActive(item.href)
+              return (
                 <Link
+                  key={item.href}
                   href={item.href}
-                  className="text-sm font-medium text-black/80 hover:text-black hover:underline underline-offset-4 transition-all duration-300 ease-out hover:scale-105 hover:-translate-y-0.5"
+                  aria-current={active ? "page" : undefined}
+                  className={`px-3 sm:px-4 py-1.5 rounded-full text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-black/40
+                    ${active ? "bg-black text-white" : "text-black/80 hover:text-black hover:bg-black/5"}`}
                 >
                   {item.label}
                 </Link>
-              </div>
-            ))}
+              )
+            })}
           </nav>
-
-          {/* Mobile: animated hamburger */}
-          <button
-            onClick={toggleMenu}
-            className={`md:hidden p-3 rounded-lg transition-all duration-300 ease-out active:scale-95
-                       ${isMenuOpen ? "rotate-90" : "rotate-0"}`}
-            aria-label="Toggle navigation menu"
-            aria-expanded={isMenuOpen}
-            aria-controls="mobile-menu"
-          >
-            <div className="relative h-6 w-6">
-              <Menu className={`absolute inset-0 h-6 w-6 text-black transition-opacity duration-200 ${isMenuOpen ? "opacity-0" : "opacity-100"}`} />
-              <X className={`absolute inset-0 h-6 w-6 text-black transition-opacity duration-200 ${isMenuOpen ? "opacity-100" : "opacity-0"}`} />
-            </div>
-          </button>
         </div>
 
-        {/* Mobile menu overlay */}
+        {/* Right: Mobile toggle */}
+        <button
+          onClick={toggleMenu}
+          className="md:hidden p-3 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-black/40"
+          aria-label="Toggle navigation menu"
+          aria-expanded={isMenuOpen}
+          aria-controls="mobile-menu"
+        >
+          {isMenuOpen ? (
+            <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M18 6L6 18M6 6l12 12"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          ) : (
+            <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M3 6h18M3 12h18M3 18h18"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          )}
+        </button>
+      </div>
+
+      {/* Mobile menu */}
+      {isMenuOpen && (
         <div
           id="mobile-menu"
-          className={`md:hidden fixed inset-0 z-[100] transition-opacity duration-300
-            ${isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
-          style={{
-            background: "rgba(255,255,255,0.92)",
-            backdropFilter: "blur(24px) saturate(160%)",
-            WebkitBackdropFilter: "blur(24px) saturate(160%)",
-          }}
+          className="md:hidden fixed inset-0 z-[100] bg-white/95 backdrop-blur-sm"
           aria-hidden={!isMenuOpen}
         >
           <div className="relative h-full w-full">
-            {/* Close button */}
             <button
               onClick={toggleMenu}
-              className="absolute right-4 p-3 rounded-full hover:bg-gray-200 transition active:scale-95 pointer-events-auto z-[200]"
-              style={{ top: "calc(env(safe-area-inset-top, 0px) + 8px)" }}
+              className="absolute right-4 top-4 p-3 rounded-full hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-black/40"
               aria-label="Close navigation menu"
             >
-              <X className="h-6 w-6 text-black" />
+              <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M18 6L6 18M6 6l12 12"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
             </button>
 
-            {/* Sliding panel */}
-            <div
-              className={`absolute inset-0 flex flex-col items-center justify-center w-full
-                          px-6 pt-20 pb-12 text-black transform transition-all duration-300
-                          ${isMenuOpen ? "translate-y-0 opacity-100 scale-100" : "translate-y-4 opacity-0 scale-[0.99]"}`}
-              style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 5rem)" }}
-            >
-              {/* Logo inside mobile menu */}
+            <div className="flex flex-col items-center justify-center h-full w-full px-6 pt-24 pb-12 text-black">
               <Link
                 href="/"
                 onClick={toggleMenu}
-                className={`mb-14 transition-transform duration-200 hover:scale-105
-                            ${isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1"}`}
-                style={{ transitionDelay: "80ms" }}
+                className="mb-12"
                 aria-label="Go to home"
               >
                 <img
@@ -158,28 +147,26 @@ export function SiteHeader() {
               </Link>
 
               <nav className="flex flex-col items-center gap-8 text-center">
-                {[
-                  { href: "/", label: "Home" },
-                  { href: "/aboutus", label: "About us" },
-                  { href: "/careers", label: "Careers" },
-                  { href: "/contactus", label: "Contact Us" },
-                ].map((item, i) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={toggleMenu}
-                    className={`text-2xl font-medium transition-all duration-300 hover:scale-105
-                                ${isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
-                    style={{ transitionDelay: `${120 * (i + 2)}ms` }}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
+                {navItems.map((item) => {
+                  const active = isActive(item.href)
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={toggleMenu}
+                      aria-current={active ? "page" : undefined}
+                      className={`text-2xl font-medium
+                        ${active ? "text-black" : "text-black/80 hover:text-black"}`}
+                    >
+                      {item.label}
+                    </Link>
+                  )
+                })}
               </nav>
             </div>
           </div>
         </div>
-      </header>
-    </>
+      )}
+    </header>
   )
 }

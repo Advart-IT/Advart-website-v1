@@ -10,10 +10,11 @@ type Insight = {
 
 export default function Insights() {
   const insights: Insight[] = [
-    { icon: "/hero/insights/bar.svg", text: "100k+ Monthly Visitors", description: "BeeLittle attracts over 100,000 website visitors every month." },
-    { icon: "/hero/insights/ranking.svg", text: "1,600+ Product Variants", description: "BeeLittle scaled to 1,600 SKUs across 300+ variants." },
-    { icon: "/hero/insights/net-butterfly.svg", text: "22k Instagram Followers", description: "Zing Clothing's @zingclothing.in counts 22,000 followers on Instagram." },
-    { icon: "/hero/insights/paper.svg", text: "8× Collection Growth", description: "Prathiksham expanded seasonal collections from 2 to 8 in one year." },
+   { icon: "/hero/insights/bar.svg", text: "100k+ Monthly Visitors", description: "BeeLittle attracts over 100,000 website visitors every month." },
+{ icon: "/hero/insights/ranking.svg", text: "10X Revenue Growth", description: "Advart has scaled client revenue to ₹30 Cr within 5 years." },
+{ icon: "/hero/insights/net-butterfly.svg", text: "1.5k+ SKUs", description: "Over 1,500 SKUs across 200+ categories." },
+{ icon: "/hero/insights/paper.svg", text: "200M+ Social Views", description: "More than 200 million views across social platforms." },
+
   ]
 
   const viewportRef = useRef<HTMLDivElement>(null)

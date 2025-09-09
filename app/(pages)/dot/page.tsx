@@ -104,8 +104,8 @@ export default function DotPage() {
   // Match your folder: public/dot/dot-*.webm (and optional mp4 fallbacks)
   const socialWEBM = resolveAsset("/dot/dot-social.webm", basePath);
   const socialMP4  = resolveAsset("/dot/dot-social.mp4", basePath); // add this file for Safari
-  const dataWEBM   = resolveAsset("/dot/dot-data.webm", basePath);
-  const dataMP4    = resolveAsset("/dot/dot-data.mp4", basePath);   // add this file for Safari
+  const dataWEBM   = resolveAsset("/dot/dot-data1.webm", basePath);
+  const dataMP4    = resolveAsset("/dot/dot-data1.mp4", basePath);   // add this file for Safari
 
   return (
     <div className="min-h-screen bg-[#F6F7F9] text-black py-12 md:py-20">
@@ -113,7 +113,7 @@ export default function DotPage() {
         {/* Hero */}
         <section className="text-center mb-16 md:mb-24">
           <div className="space-y-4">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 mt-11">
               Do It With <span className="text-[#ffdc38]">DOT</span>
             </h1>
             <p className="text-lg md:text-xl max-w-2xl mx-auto">
@@ -128,9 +128,6 @@ export default function DotPage() {
             >
               Book a Demo
               <ArrowRight className="ml-2 w-5 h-5" />
-            </button>
-            <button className="inline-flex items-center justify-center px-8 py-3 rounded-md bg-white text-black hover:bg-black hover:text-white border border-black shadow-sm focus:outline-none text-lg font-medium">
-              Start Free Trial
             </button>
           </div>
         </section>
@@ -242,7 +239,7 @@ export default function DotPage() {
               <source src={videoSrc} type="video/webm" />
               {/* Fallback if user clicked WEBM on a Safari device */}
               {videoSrc.includes("dot-social") && <source src={socialMP4} type="video/mp4" />}
-              {videoSrc.includes("dot-data") && <source src={dataMP4} type="video/mp4" />}
+              {videoSrc.includes("dot-data1") && <source src={dataMP4} type="video/mp4" />}
             </video>
           </div>
         </div>

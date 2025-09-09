@@ -2,6 +2,7 @@
 
 import React, { forwardRef, useRef, useState } from "react"
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion"
+import { useRouter } from "next/navigation"
 
 function cn(...classes: (string | undefined | false)[]) {
   return classes.filter(Boolean).join(" ")
@@ -32,7 +33,7 @@ function Tabs({
 
   // track direction for nicer content transitions
   const prevIdxRef = useRef(0)
-  const [direction, setDirection] = useState(1)
+  const [direction, setDirection] = useState<number>(1)
   function switchTo(idx: number) {
     setDirection(idx > prevIdxRef.current ? 1 : -1)
     prevIdxRef.current = idx
@@ -63,43 +64,42 @@ function Tabs({
     <>
       {/* Tab buttons */}
       <LayoutGroup id="dot-tabs">
-  <div
-    className={cn(
-      "relative flex justify-center flex-wrap items-center gap-2 sm:gap-3 md:gap-4 w-full pt-4",
-      containerClassName
-    )}
-  >
-    {tabs.map((tab, idx) => {
-      const isActive = active.value === tab.value
-      return (
-        <motion.button
-          layout
-          key={tab.value}
-          onClick={() => switchTo(idx)}
+        <div
           className={cn(
-            "relative px-3 sm:px-4 py-1.5 sm:py-2 rounded-full leading-none border text-sm sm:text-base transition-colors",
-            "border-transparent",
-            isActive
-              ? cn("text-white", activeTabClassName)
-              : cn("text-black hover:text-gray-700", tabClassName)
+            "relative flex justify-center flex-wrap items-center gap-2 sm:gap-3 md:gap-4 w-full pt-4",
+            containerClassName
           )}
-          aria-pressed={isActive}
         >
-          {isActive && (
-            <motion.span
-              layoutId="tab-pill"
-              className="absolute inset-0 rounded-full bg-black transform-gpu"
-              style={{ willChange: "transform, opacity" }}
-              transition={{ type: "spring", stiffness: 400, damping: 30, mass: 0.4 }}
-            />
-          )}
-          <span className="relative z-10">{tab.title}</span>
-        </motion.button>
-      )
-    })}
-  </div>
-</LayoutGroup>
-
+          {tabs.map((tab, idx) => {
+            const isActive = active.value === tab.value
+            return (
+              <motion.button
+                layout
+                key={tab.value}
+                onClick={() => switchTo(idx)}
+                className={cn(
+                  "relative px-3 sm:px-4 py-1.5 sm:py-2 rounded-full leading-none border text-sm sm:text-base transition-colors",
+                  "border-transparent",
+                  isActive
+                    ? cn("text-white", activeTabClassName)
+                    : cn("text-black hover:text-gray-700", tabClassName)
+                )}
+                aria-pressed={isActive}
+              >
+                {isActive && (
+                  <motion.span
+                    layoutId="tab-pill"
+                    className="absolute inset-0 rounded-full bg-black transform-gpu"
+                    style={{ willChange: "transform, opacity" }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30, mass: 0.4 }}
+                  />
+                )}
+                <span className="relative z-10">{tab.title}</span>
+              </motion.button>
+            )
+          })}
+        </div>
+      </LayoutGroup>
 
       {/* Content area – responsive height driven by video */}
       <div className={cn("mt-6 sm:mt-8 relative w-full", contentClassName)}>
@@ -134,12 +134,20 @@ function Tabs({
 function SafariFrame({
   children,
   url = "app.advartit.in",
+  onClick,
 }: {
   children: React.ReactNode
   url?: string
+  onClick?: () => void
 }) {
   return (
-    <div className="inline-block w-full max-w-full rounded-xl border border-gray-200 shadow-lg overflow-hidden bg-white">
+    <div 
+      className={cn(
+        "inline-block w-full max-w-full rounded-xl border border-gray-200 shadow-lg overflow-hidden bg-white",
+        onClick && "cursor-pointer hover:shadow-xl transition-shadow duration-300"
+      )}
+      onClick={onClick}
+    >
       {/* Safari top bar */}
       <div className="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 border-b border-gray-200 bg-gray-100">
         {/* address bar */}
@@ -164,9 +172,15 @@ function VideoContent({
   videoSrc: string
   urlLabel?: string
 }) {
+  const router = useRouter()
   const type = videoSrc.endsWith(".webm") ? "video/webm" : "video/mp4"
+  
+  const handleClick = () => {
+    router.push('/dot')
+  }
+
   return (
-    <SafariFrame url={urlLabel}>
+    <SafariFrame url={urlLabel} onClick={handleClick}>
       <video
         key={videoSrc} // force reload when switching
         autoPlay
@@ -200,7 +214,7 @@ function DotTabs() {
       value: "data",
       content: (
         <VideoContent
-          videoSrc="/dot/dot-data.webm"
+          videoSrc="/dot/dot-data1.webm"
           urlLabel="app.advartit.in/data"
         />
       ),

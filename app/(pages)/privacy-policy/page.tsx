@@ -24,9 +24,8 @@ export default function PrivacyPolicyPage() {
           <section className="space-y-3">
             <h2 className="text-xl font-semibold">Information We Collect</h2>
             <ul className="list-disc pl-5 space-y-1">
-              <li><strong>Contact details:</strong> name, business name (optional), email, phone.</li>
-              <li><strong>Form details:</strong> inquiry reason and your message.</li>
-              <li><strong>Technical info:</strong> IP address, browser/device data (collected by our host and Web3Forms).</li>
+              <li><strong>Contact details:</strong> Name, Business name , Email, Phone.</li>
+              <li><strong>Form details:</strong> Inquiry reason and your message.</li>
             </ul>
           </section>
 

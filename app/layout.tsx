@@ -3,7 +3,7 @@ import type { Metadata } from "next/types";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import ClientGreetingOverlay from "@/components/hero/common/client-greeting-overlay";
+import ClientGreetingOverlay from "@/components/hero/common/client-greeting-overlay"; // self-guarded
 import LenisProvider from "@/components/providers/lenis-provider";
 import Script from "next/script";
 
@@ -60,9 +60,7 @@ export const metadata: Metadata = {
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
     ],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
-    other: [
-      { rel: "mask-icon", url: "/logo.-1.png", color: "#0b0f19" },
-    ],
+    other: [{ rel: "mask-icon", url: "/logo.-1.png", color: "#0b0f19" }],
   },
   manifest: "/site.webmanifest",
   themeColor: "#0b0f19",
@@ -111,7 +109,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 { "@type": "Offer", itemOffered: { "@type": "Service", name: "Web Design & Development" } },
                 { "@type": "Offer", itemOffered: { "@type": "Service", name: "Content Marketing" } },
               ],
-              sameAs: [], // add social profile URLs if you have them
+              sameAs: [],
             }),
           }}
         />
@@ -121,6 +119,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <main className="flex-1 min-h-[100dvh]">{children}</main>
             <SiteFooter />
           </div>
+
+          {/* Self-guarded overlay: only shows on "/" and once per session */}
           <ClientGreetingOverlay />
         </LenisProvider>
       </body>

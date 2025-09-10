@@ -130,7 +130,7 @@ function Tabs({
   )
 }
 
-/* Safari-like frame for video (responsive, never crops video) */
+/* Safari-like frame for video (responsive, scaled down) */
 function SafariFrame({
   children,
   url = "app.advartit.in",
@@ -143,16 +143,17 @@ function SafariFrame({
   return (
     <div 
       className={cn(
-        "inline-block w-full max-w-full rounded-xl border border-gray-200 shadow-lg overflow-hidden bg-white",
-        onClick && "cursor-pointer hover:shadow-xl transition-shadow duration-300"
+        // Reduced max width and added responsive scaling
+        "inline-block w-full max-w-2xl lg:max-w-3xl rounded-lg border border-gray-200 shadow-md overflow-hidden bg-white mx-auto",
+        onClick && "cursor-pointer hover:shadow-lg transition-shadow duration-300"
       )}
       onClick={onClick}
     >
-      {/* Safari top bar */}
-      <div className="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 border-b border-gray-200 bg-gray-100">
-        {/* address bar */}
+      {/* Safari top bar - smaller */}
+      <div className="flex items-center gap-1.5 px-2 py-1 border-b border-gray-200 bg-gray-100">
+        {/* address bar - smaller */}
         <div className="flex-1 flex justify-center min-w-0">
-          <div className="px-3 sm:px-4 py-0.5 sm:py-1 text-[10px] sm:text-xs truncate text-gray-500 bg-white rounded-full border border-gray-300 max-w-[60%] sm:max-w-[70%]">
+          <div className="px-2.5 sm:px-3 py-0.5 text-[9px] sm:text-[10px] truncate text-gray-500 bg-white rounded-full border border-gray-300 max-w-[50%] sm:max-w-[60%]">
             {url}
           </div>
         </div>
@@ -164,7 +165,7 @@ function SafariFrame({
   )
 }
 
-/* Video content wrapped inside Safari frame */
+/* Video content wrapped inside Safari frame - scaled down */
 function VideoContent({
   videoSrc,
   urlLabel,
@@ -188,7 +189,8 @@ function VideoContent({
         muted
         playsInline
         preload="auto"           // reduce blank frame risk on switch
-        className="block w-full h-auto object-contain"
+        // Scaled down video with max height constraint and proper fitting
+        className="block w-full h-auto object-cover max-h-[300px] sm:max-h-[400px] lg:max-h-[500px] rounded-b-lg"
       >
         <source src={videoSrc} type={type} />
         Your browser does not support the video tag.
@@ -222,7 +224,8 @@ function DotTabs() {
   ]
 
   return (
-    <div className="relative flex flex-col w-full max-w-5xl mx-auto items-start justify-start">
+    // Reduced container width for overall smaller appearance
+    <div className="relative flex flex-col w-full max-w-4xl mx-auto items-start justify-start">
       <Tabs tabs={tabs} />
     </div>
   )
@@ -251,7 +254,7 @@ const DotSection = forwardRef<HTMLElement, DotSectionProps>(({ isVisible }, ref)
               Because when we saw entrepreneurs struggling to figure out their own product data,
               we cracked it and made it simple with Dot.
             </p>
-          </div>
+          </div>  
         </div>
 
         <div className="flex flex-col overflow-visible">

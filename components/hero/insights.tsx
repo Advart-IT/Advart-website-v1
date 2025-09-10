@@ -11,7 +11,7 @@ type Insight = {
 export default function Insights() {
   const insights: Insight[] = [
    { icon: "/hero/insights/bar.svg", text: "100k+ Monthly Visitors", description: "BeeLittle attracts over 100,000 website visitors every month." },
-{ icon: "/hero/insights/ranking.svg", text: "10X Revenue Growth", description: "Advart has scaled client revenue to ₹30 Cr within 5 years." },
+{ icon: "/hero/insights/ranking.svg", text: "10X Revenue Growth", description: "We scaled the client revenue to ₹30 Cr over 5 years." },
 { icon: "/hero/insights/net-butterfly.svg", text: "1.5k+ SKUs", description: "Over 1,500 SKUs across 200+ categories." },
 { icon: "/hero/insights/paper.svg", text: "200M+ Social Views", description: "More than 200 million views across social platforms." },
 

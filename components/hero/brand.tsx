@@ -238,7 +238,10 @@ const GsapStackScroll: React.FC = () => {
 
 export default function AdvartSection() {
   return (
-    <section id="advart" className="section scroll-mt-24 md:scroll-mt-32">
+    <section
+      id="advart"
+      className="section scroll-mt-24 md:scroll-mt-32 hidden md:block" // 👈 hides whole section on mobile
+    >
       <div className="section-container pb-0">
         <div className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl">
           {/* Top copy */}
@@ -254,7 +257,7 @@ export default function AdvartSection() {
             </div>
           </section>
 
-          {/* Scroller (unchanged) */}
+          {/* Scroller */}
           <div className="w-full">
             <GsapStackScroll />
           </div>
@@ -263,4 +266,3 @@ export default function AdvartSection() {
     </section>
   )
 }
-

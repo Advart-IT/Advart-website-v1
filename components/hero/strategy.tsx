@@ -68,7 +68,7 @@ const Strategy = () => {
   }, []);
 
   const strategyText =
-    "Data is at the heart of everything we do, powered by creative fuel that sparks the impact you crave for your brand's growth.";
+    "Data is at the heart of everything we do, powered by creative fuel that sparks the impact you crave for your brand's growth. We deliver it through systems built to scale by partnering with you every step of the way.";
   const words = strategyText.split(" ");
 
   return (

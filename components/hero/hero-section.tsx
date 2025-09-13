@@ -195,7 +195,7 @@ export default function HeroSection() {
                         alt=""
                         width={200}
                         height={200}
-                        className="w-28 sm:w-36 h-auto"
+                        className="w-24 sm:w-36 h-auto"
                         priority={false}
                       />
                       <Image
@@ -203,7 +203,7 @@ export default function HeroSection() {
                         alt=""
                         width={200}
                         height={200}
-                        className="w-40 sm:w-36 h-auto"
+                        className="w-36 sm:w-36 h-auto"
                         priority={false}
                       />
                     </div>

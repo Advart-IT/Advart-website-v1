@@ -3,11 +3,12 @@ import type { Metadata } from "next/types";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import ClientGreetingOverlay from "@/components/hero/common/client-greeting-overlay"; // self-guarded
+import ClientGreetingOverlay from "@/components/hero/common/client-greeting-overlay";
 import LenisProvider from "@/components/providers/lenis-provider";
 import Script from "next/script";
 
-const SITE_NAME = "Advart";
+const SITE_NAME = "Advart Technologies";                 // <— shows in tab title
+const LEGAL_NAME = "Advart Technologies Pvt Ltd";        // <— use in schema
 const TAGLINE = "ROI-Focused Digital Marketing Agency in Coimbatore";
 const DOMAIN = "https://www.advartit.in";
 const OG_IMAGE = `${DOMAIN}/og.jpg`;
@@ -17,9 +18,12 @@ const isProd = process.env.NODE_ENV === "production";
 
 export const metadata: Metadata = {
   metadataBase: isProd ? new URL(DOMAIN) : undefined,
-  title: { default: `${SITE_NAME} | ${TAGLINE}`, template: `%s | ${SITE_NAME}` },
+  title: {
+    default: `${SITE_NAME} | ${TAGLINE}`,
+    template: `%s | ${SITE_NAME}`,
+  },
   description:
-    "Advart is a Coimbatore-based digital marketing agency specializing in SEO, PPC, social media, and web design to grow your business.",
+    "Advart Technologies is a Coimbatore-based digital marketing agency specializing in SEO, PPC, social media, and web design to grow your business.",
   keywords: [
     "digital marketing Coimbatore",
     "digital marketing agency Coimbatore",
@@ -30,12 +34,12 @@ export const metadata: Metadata = {
     "performance marketing",
     "content marketing",
     "local SEO",
-    "Advart",
+    "Advart Technologies",
   ],
   applicationName: SITE_NAME,
-  authors: [{ name: SITE_NAME }],
-  creator: SITE_NAME,
-  publisher: SITE_NAME,
+  authors: [{ name: LEGAL_NAME }],
+  creator: LEGAL_NAME,
+  publisher: LEGAL_NAME,
   category: "Marketing",
   alternates: { canonical: "/", languages: { "en-IN": "/" } },
   openGraph: {
@@ -67,7 +71,7 @@ export const metadata: Metadata = {
   viewport: { width: "device-width", initialScale: 1 },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en-IN" dir="ltr">
       <body className="bg-[#F6F7F9] text-black">
@@ -80,7 +84,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               "@context": "https://schema.org",
               "@type": "LocalBusiness",
               "@id": `${DOMAIN}/#local`,
-              name: SITE_NAME,
+              name: LEGAL_NAME,        // <— use full legal name here
+              legalName: LEGAL_NAME,
               url: DOMAIN,
               image: [OG_IMAGE],
               logo: LOGO,
@@ -109,7 +114,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 { "@type": "Offer", itemOffered: { "@type": "Service", name: "Web Design & Development" } },
                 { "@type": "Offer", itemOffered: { "@type": "Service", name: "Content Marketing" } },
               ],
-              sameAs: [],
+              sameAs: [], // add socials when ready
             }),
           }}
         />
@@ -119,8 +124,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <main className="flex-1 min-h-[100dvh]">{children}</main>
             <SiteFooter />
           </div>
-
-          {/* Self-guarded overlay: only shows on "/" and once per session */}
           <ClientGreetingOverlay />
         </LenisProvider>
       </body>

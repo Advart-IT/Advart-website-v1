@@ -4,9 +4,17 @@ import React, { useLayoutEffect, useRef, useState, useCallback } from "react"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/ui/carousel"
+import { cn } from "@/lib/utils"
+
 gsap.registerPlugin(ScrollTrigger)
 
-type Card = {
+type CardT = {
   imageSrc: string
   imageAlt?: string
   title: string
@@ -15,68 +23,66 @@ type Card = {
   result: string
 }
 
+// Shared cards data
+const cards: CardT[] = [
+  {
+    imageSrc: "hero/brand/bee-little.webp",
+    title: "Beelittle",
+    description:
+      "10 YEARS OF BEELITTLE (A 4 yrs partnership we proudly celebrate) Beelittle turned 10, and we knew the celebration had to feel just as special as the journey. So, we went above and beyond to make this milestone a part of every tiny one's home.",
+    whatTried: [
+      "30-Day Strong Digital Campaign",
+      "Private Screening & Celebration for Followers",
+      "Custom Storybook",
+    ],
+    result:
+      "A celebration that brought in strong community engagement, built deeper trust and skyrocketed brand awareness… all of which positively reflected in sales.",
+  },
+  {
+    imageSrc: "/hero/brand/zing.webp",
+    title: "Zing",
+    description:
+      "A homegrown kurta brand that feels like home to us... because we built it from scratch, turning failures into lessons and growth into success.",
+    whatTried: [
+      "Production to post-production...",
+      "Everything it takes to make a brand stand tall.",
+      "We tested and tried it all with Zing.",
+    ],
+    result:
+      "The business that began with just ₹30k has now grown into a turnover of ₹3 crore.",
+  },
+  {
+    imageSrc: "hero/brand/prathiksham.webp",
+    title: "Prathiksham",
+    description:
+      "A well-known homegrown designer with 15 years of experience wanted to launch her own brand. She came to us with a dream and together, we made it real.",
+    whatTried: ["Business Consulting", "Branding & Website Presence", "Social Media Presence"],
+    result:
+      "Her kurta line is now a go-to in every working woman's wardrobe. Sales have peaked and the label has grown into a name that many proudly recognise.",
+  },
+]
+
+/* =========================
+   Desktop GSAP stack scroll
+   ========================= */
 const GsapStackScroll: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
-
-  const cards: Card[] = [
-    {
-      imageSrc: "hero/brand/bee-little.webp",
-      title: "Beelittle",
-      description:
-        "10 YEARS OF BEELITTLE (A 4 yrs partnership we proudly celebrate) Beelittle turned 10, and we knew the celebration had to feel just as special as the journey. So, we went above and beyond to make this milestone a part of every tiny one's home.",
-      whatTried: [
-        "30-Day Strong Digital Campaign",
-        "Private Screening & Celebration for Followers",
-        "Custom Storybook",
-      ],
-      result:
-        "A celebration that brought in strong community engagement, built deeper trust and skyrocketed brand awareness… all of which positively reflected in sales.",
-    },
-    {
-      imageSrc: "/hero/brand/zing.webp",
-      title: "Zing",
-      description:
-        "A homegrown kurta brand that feels like home to us... because we built it from scratch, turning failures into lessons and growth into success.",
-      whatTried: [
-        "Almost everything...",
-        "From consulting to strategy.",
-        "Production to post-production...",
-        "Everything it takes to make a brand stand tall.",
-        "We tested and tried it all with Zing.",
-      ],
-      result:
-        "The business that began with just ₹30k has now grown into a turnover of ₹3 crore.",
-    },
-    {
-      imageSrc: "hero/brand/prathiksham.webp",
-      title: "Prathiksham",
-      description:
-        "A well-known homegrown designer with 15 years of experience wanted to launch her own brand. She came to us with a dream and together, we made it real.",
-      whatTried: ["Business Consulting", "Branding & Website Presence", "Social Media Presence"],
-      result:
-        "Her kurta line is now a go-to in every working woman's wardrobe. Sales have peaked and the label has grown into a name that many proudly recognise.",
-    },
-  ]
-
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const cardRefs = useRef<HTMLDivElement[]>([])
   const tlRef = useRef<gsap.core.Timeline | null>(null)
   const stRef = useRef<ScrollTrigger | null>(null)
 
-  const navigateToCard = useCallback(
-    (targetIndex: number) => {
-      const st = stRef.current
-      if (!st) return
+  const navigateToCard = useCallback((targetIndex: number) => {
+    const st = stRef.current
+    if (!st) return
 
-      const clamped = Math.max(0, Math.min(cards.length - 1, targetIndex))
-      const progress = clamped / Math.max(cards.length - 1, 1)
-      const y = st.start + progress * (st.end - st.start)
+    const clamped = Math.max(0, Math.min(cards.length - 1, targetIndex))
+    const progress = clamped / Math.max(cards.length - 1, 1)
+    const y = st.start + progress * (st.end - st.start)
 
-      window.scrollTo({ top: y, behavior: "smooth" })
-      setCurrentIndex(clamped)
-    },
-    [cards.length]
-  )
+    window.scrollTo({ top: y, behavior: "smooth" })
+    setCurrentIndex(clamped)
+  }, [])
 
   useLayoutEffect(() => {
     if (!wrapRef.current || cardRefs.current.length === 0) return
@@ -158,14 +164,16 @@ const GsapStackScroll: React.FC = () => {
     return () => {
       tlRef.current = null
       stRef.current = null
+      ctx.revert()
     }
-  }, [cards.length])
+  }, [])
 
   return (
     <div className="relative">
       <section className="relative w-full">
         <div ref={wrapRef} className="relative min-h-screen w-full">
-          <div className="fixed top-0 left-0 w-full h-screen flex items-center justify-center z-10">
+          {/* FIX: remove fixed; let ScrollTrigger handle pinning */}
+          <div className="absolute inset-0 h-screen flex items-center justify-center">
             <div className="relative w-[95%] sm:w-[97%] lg:w-[99%] max-w-7xl mx-auto h-[78vh] sm:h-[70vh] lg:h-[75vh] overflow-hidden">
               {(() => (cardRefs.current.length = cards.length, null))()}
               {cards.map((card, index) => (
@@ -236,33 +244,131 @@ const GsapStackScroll: React.FC = () => {
   )
 }
 
+/* =========================
+   Mobile carousel (center fix)
+   ========================= */
+const MobileScaleCarousel: React.FC = () => {
+  const [api, setApi] = useState<CarouselApi>()
+  const [current, setCurrent] = useState(1)
+
+  React.useEffect(() => {
+    if (!api) return
+    setCurrent(api.selectedScrollSnap() + 1)
+    api.on("select", () => setCurrent(api.selectedScrollSnap() + 1))
+  }, [api])
+
+  return (
+    <div className="mx-auto w-full max-w-sm px-2">
+      <Carousel setApi={setApi} className="w-full" opts={{ loop: true, align: "center", containScroll: "trimSnaps" }}>
+        {/* override shadcn's -ml-4 */}
+        <CarouselContent className="py-3 !ml-0">
+          {cards.map((card, index) => (
+            <CarouselItem key={card.title} className="basis-[75%] px-2">
+              <div
+                className={cn(
+                  "transition-transform duration-500 transform-gpu will-change-transform",
+                  { "scale-100": index === current - 1, "scale-[0.85]": index !== current - 1 }
+                )}
+              >
+                <div className="relative w-full h-[480px] overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 bg-black text-white">
+                  <div className="h-full p-4 flex flex-col justify-between">
+                    {/* Image */}
+                    <div className="flex justify-center flex-shrink-0">
+                      <div className="relative w-full max-w-[140px]">
+                        <img
+                          src={card.imageSrc}
+                          alt={card.imageAlt ?? `${card.title} showcase`}
+                          className="w-full h-auto max-h-[120px] object-contain rounded-lg shadow-lg mx-auto"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 flex flex-col justify-between space-y-3 mt-3">
+                      <div className="space-y-2">
+                        <h3 className="text-lg font-light text-white line-clamp-2">{card.title}</h3>
+                        <p className="text-xs text-gray-200 leading-relaxed line-clamp-3">{card.description}</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <h4 className="text-xs font-medium text-white">What did we try?</h4>
+                        <ul className="space-y-1">
+                          {card.whatTried.map((item, i) => (
+                            <li key={i} className="flex items-start text-xs text-gray-300">
+                              <span className="text-white mr-2 mt-0.5 flex-shrink-0">•</span>
+                              <span className="line-clamp-2">{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="space-y-2">
+                        <h4 className="text-xs font-medium text-white">And the result?</h4>
+                        <p className="text-xs text-gray-300 leading-relaxed line-clamp-3">{card.result}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
+    </div>
+  )
+}
+
 export default function AdvartSection() {
   return (
-    <section
-      id="advart"
-      className="section scroll-mt-24 md:scroll-mt-32 hidden md:block" // 👈 hides whole section on mobile
-    >
-      <div className="section-container pb-0">
-        <div className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl">
-          {/* Top copy */}
-          <section className="w-full">
-            <div className="max-w-6xl mx-auto text-center">
-              <h2 className="heading2 pb-1">
-                All exciting things we do at <span className="font-semibold">Advart...</span>
-              </h2>
-              <p className="paragraph mx-auto text-center whitespace-pre-line">
-                From scaling a brand from ₹30K to ₹3Cr, to building a homegrown brand like Zing, to creating many more
-                meaningful brand stories… We love doing it all, while nailing it right!
-              </p>
-            </div>
-          </section>
+    <>
+      {/* Mobile */}
+      <section id="advart" className="section scroll-mt-24 md:scroll-mt-32 md:hidden">
+        <div className="section-container pb-0">
+          <div className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl">
+            <section className="w-full">
+              <div className="max-w-6xl mx-auto text-center">
+                <h2 className="heading2 pb-1">
+                  All exciting things we do at <span className="font-semibold">Advart...</span>
+                </h2>
+                <p className="paragraph mx-auto text-center whitespace-pre-line">
+                  From scaling a brand from ₹30K to ₹3Cr, to building a homegrown brand like Zing, to creating many more
+                  meaningful brand stories… We love doing it all, while nailing it right!
+                </p>
+              </div>
+            </section>
 
-          {/* Scroller */}
-          <div className="w-full">
-            <GsapStackScroll />
+            <div className="w-full">
+              <MobileScaleCarousel />
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {/* Desktop */}
+      <section
+        id="advart-desktop"
+        className="section scroll-mt-24 md:scroll-mt-32 hidden md:block"
+      >
+        <div className="section-container pb-0">
+          <div className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl">
+            <section className="w-full">
+              <div className="max-w-6xl mx-auto text-center">
+                <h2 className="heading2 pb-1">
+                  All exciting things we do at <span className="font-semibold">Advart...</span>
+                </h2>
+                <p className="paragraph mx-auto text-center whitespace-pre-line">
+                  From scaling a brand from ₹30K to ₹3Cr, to building a homegrown brand like Zing, to creating many more
+                  meaningful brand stories… We love doing it all, while nailing it right!
+                </p>
+              </div>
+            </section>
+
+            <div className="w-full">
+              <GsapStackScroll />
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
   )
 }

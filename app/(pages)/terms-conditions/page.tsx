@@ -1,9 +1,5 @@
 import React from "react"
 
-export const metadata = {
-  title: "Terms & Conditions | Advart",
-  description: "Terms governing use of Advart’s website and services.",
-}
 
 export default function TermsPage() {
 

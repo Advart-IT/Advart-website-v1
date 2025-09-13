@@ -2,6 +2,7 @@ import Link from "next/link"
 import { fetchJobs } from "@/lib/jobs"
 import OpenApplicationForm from "@/components/open-application-form"
 
+
 export default async function CareersPage() {
   const jobs = await fetchJobs()
 

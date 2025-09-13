@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useEffect } from "react"
+import { useRef, useState } from "react"
 
 type Insight = {
   icon: string
@@ -10,151 +10,91 @@ type Insight = {
 
 export default function Insights() {
   const insights: Insight[] = [
-   { icon: "/hero/insights/bar.svg", text: "100k+ Monthly Visitors", description: "BeeLittle attracts over 100,000 website visitors every month." },
-{ icon: "/hero/insights/ranking.svg", text: "10X Revenue Growth", description: "We scaled the client revenue to ₹30 Cr over 5 years." },
-{ icon: "/hero/insights/net-butterfly.svg", text: "1.5k+ SKUs", description: "Over 1,500 SKUs across 200+ categories." },
-{ icon: "/hero/insights/paper.svg", text: "200M+ Social Views", description: "More than 200 million views across social platforms." },
-
+    {
+      icon: "/hero/insights/ranking.svg",
+      text: "Building High-Growth Brands",
+      description: "We've scaled client revenues to ₹30 Cr+ and beyond.",
+    },
+    {
+      icon: "/hero/insights/net-butterfly.svg",
+      text: "15k+ SKUs",
+      description: "Over 15,000 SKUs across 200+ categories.",
+    },
+    {
+      icon: "/hero/insights/paper.svg",
+      text: "400M+ Social Views",
+      description: "More than 400 million views across social platforms.",
+    },
   ]
 
-  const viewportRef = useRef<HTMLDivElement>(null)
-  const trackRef = useRef<HTMLDivElement>(null)
+  // --- Mobile slider state & helpers (mirrors the above slider behavior)
   const [active, setActive] = useState(0)
-  const [viewportH, setViewportH] = useState<number | null>(null)
-  const autoplayRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const pausedRef = useRef(false)
+  const [touchStart, setTouchStart] = useState<number | null>(null)
+  const [touchEnd, setTouchEnd] = useState<number | null>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
 
-  // Create multiple copies for seamless infinite scroll
-  const extendedInsights = [
-    ...insights,
-    ...insights,
-    ...insights,
-  ]
+  const next = () => setActive((p) => Math.min(p + 1, insights.length - 1))
+  const prev = () => setActive((p) => Math.max(p - 1, 0))
+  const goTo = (i: number) =>
+    setActive(() => Math.max(0, Math.min(i, insights.length - 1)))
 
-  const measureMaxHeight = () => {
-    const el = trackRef.current
-    if (!el) return
-    let maxH = 0
-    el.querySelectorAll<HTMLElement>("[data-slide-card]").forEach((c) => { 
-      maxH = Math.max(maxH, c.offsetHeight) 
-    })
-    if (maxH > 0) setViewportH(maxH)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null)
+    setTouchStart(e.targetTouches[0].clientX)
   }
 
-  // Initialize position to middle set
-  useEffect(() => {
-    const el = trackRef.current
-    if (!el) return
-    
-    const initPosition = () => {
-      const slideWidth = el.clientWidth
-      const startIndex = insights.length // Start at second set (middle)
-      el.scrollTo({ left: startIndex * slideWidth, behavior: "auto" })
-    }
-
-    // Small delay to ensure DOM is ready
-    setTimeout(initPosition, 50)
-    measureMaxHeight()
-  }, [])
-
-  // Handle scroll events for seamless looping
-  useEffect(() => {
-    const el = trackRef.current
-    if (!el) return
-
-    const handleScroll = () => {
-      const slideWidth = el.clientWidth
-      const scrollLeft = el.scrollLeft
-      const currentIndex = Math.round(scrollLeft / slideWidth)
-      const totalSlides = extendedInsights.length
-
-      // Update active indicator (always show logical index 0-3)
-      setActive(currentIndex % insights.length)
-
-      // Reset position when approaching boundaries
-      if (currentIndex <= 0) {
-        // At first set, jump to second set
-        el.scrollTo({ left: insights.length * slideWidth, behavior: "auto" })
-      } else if (currentIndex >= totalSlides - insights.length) {
-        // At third set, jump back to second set
-        el.scrollTo({ left: insights.length * slideWidth, behavior: "auto" })
-      }
-    }
-
-    let ro: ResizeObserver | null = null
-    if (typeof ResizeObserver !== "undefined") {
-      ro = new ResizeObserver(() => {
-        measureMaxHeight()
-      })
-      el.querySelectorAll("[data-slide-card]").forEach((n) => ro!.observe(n))
-    }
-
-    el.addEventListener("scroll", handleScroll, { passive: true })
-
-    return () => {
-      el.removeEventListener("scroll", handleScroll)
-      ro?.disconnect()
-    }
-  }, [insights.length])
-
-  // Auto-advance functionality
-  const scrollToNext = () => {
-    const el = trackRef.current
-    if (!el) return
-    
-    const slideWidth = el.clientWidth
-    const currentScroll = el.scrollLeft
-    const nextScroll = currentScroll + slideWidth
-    
-    el.scrollTo({ left: nextScroll, behavior: "smooth" })
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX)
   }
 
-  // Go to specific slide (for dot indicators)
-  const goTo = (logicalIndex: number) => {
-    const el = trackRef.current
-    if (!el) return
-    
-    const slideWidth = el.clientWidth
-    const currentScroll = el.scrollLeft
-    const currentIndex = Math.round(currentScroll / slideWidth)
-    
-    // Find nearest instance of the target slide
-    let targetIndex = insights.length + logicalIndex // Default to middle set
-    
-    // If we're closer to first or last set, adjust accordingly
-    if (currentIndex < insights.length) {
-      targetIndex = logicalIndex
-    } else if (currentIndex >= insights.length * 2) {
-      targetIndex = insights.length * 2 + logicalIndex
-    }
-    
-    el.scrollTo({ left: targetIndex * slideWidth, behavior: "smooth" })
+  const handleTouchEnd = () => {
+    if (touchStart === null || touchEnd === null) return
+
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > 50
+    const isRightSwipe = distance < -50
+
+    if (isLeftSwipe && active < insights.length - 1) next()
+    else if (isRightSwipe && active > 0) prev()
+
+    setTouchStart(null)
+    setTouchEnd(null)
   }
-
-
 
   return (
-    <section id="insights" className="section ">
+    <section id="insights" className="section">
       <div className="section-container">
         <div>
           <div className="max-w-6xl mx-auto">
-            {/* Desktop / Large screens */}
+            {/* Desktop / Large screens (unchanged) */}
             <div className="hidden lg:grid lg:grid-cols-2 items-center gap-12 xl:gap-16">
               <div className="flex flex-col items-center justify-center text-center">
                 <h2 className="heading2 pb-4">
                   Based on <span className="font-semibold text-black">True Impact</span>
                 </h2>
                 <div className="relative w-full overflow-hidden rounded-2xl grid place-items-center">
-                  <img src="/hero/insights/man-star.webp" alt="Insights hero" className="w-64 md:w-80 h-auto object-contain pt-4" />
+                  <img
+                    src="/hero/insights/man-star.webp"
+                    alt="Insights hero"
+                    className="w-64 md:w-80 h-auto object-contain pt-4"
+                  />
                 </div>
               </div>
 
               <div className="flex flex-col gap-4 xl:gap-6">
                 {insights.map((item, i) => (
-                  <div key={i} className="group rounded-2xl border border-border bg-card p-6 xl:p-8 transition-colors duration-300">
+                  <div
+                    key={i}
+                    className="group rounded-2xl border border-border bg-card p-6 xl:p-8 transition-colors duration-300"
+                  >
                     <div className="flex items-start gap-4">
                       <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-white">
-                        <img src={item.icon || "/placeholder.svg"} alt="" className="h-10 w-10 object-contain" aria-hidden="true" />
+                        <img
+                          src={item.icon || "/placeholder.svg"}
+                          alt=""
+                          className="h-10 w-10 object-contain"
+                          aria-hidden="true"
+                        />
                       </div>
                       <div className="flex-1">
                         <h3 className="heading3 font-semibold pb-1">{item.text}</h3>
@@ -166,36 +106,45 @@ export default function Insights() {
               </div>
             </div>
 
-            {/* Mobile / Tablet — seamless infinite loop */}
+            {/* Mobile / Tablet — mirrors above slider (no loop, swipe, dots) */}
             <div className="lg:hidden">
               <div className="px-6 sm:px-8 pt-6 sm:pt-8 text-center">
                 <h2 className="heading2">
                   Based on <span className="font-semibold text-black">True Impact</span>
                 </h2>
                 <div className="relative mx-auto mt-4 mb-6 w-full overflow-hidden rounded-2xl grid place-items-center">
-                  <img src="/hero/insights/man-star.webp" alt="Insights hero" className="w-48 sm:w-56 h-auto object-contain" />
+                  <img
+                    src="/hero/insights/man-star.webp"
+                    alt="Insights hero"
+                    className="w-48 sm:w-56 h-auto object-contain"
+                  />
                 </div>
               </div>
 
-              <div ref={viewportRef} className="relative ml-[calc(50%-50vw)] w-[100vw]" style={viewportH ? { height: viewportH } : undefined}>
+              <div className="relative w-full overflow-hidden">
                 <div
                   ref={trackRef}
-                  className="
-                    flex w-full h-full snap-x snap-mandatory overflow-x-auto scroll-smooth
-                    touch-pan-x overscroll-x-contain
-                    [scroll-snap-stop:always]
-                    [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
-                  "
+                  className="flex transition-transform duration-300 ease-in-out cursor-grab active:cursor-grabbing"
+                  style={{ transform: `translateX(-${active * 100}%)` }}
                   aria-label="Insights carousel"
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
                 >
-                  {extendedInsights.map((item, i) => (
-                    <div key={`slide-${i}`} className="min-w-[100vw] w-[100vw] shrink-0 snap-start snap-always h-full">
-                      <div className="px-6 sm:px-8 h-full">
-                        <div
-                          data-slide-card
-                          className="w-full h-full rounded-xl border border-black/10 bg-white py-8 px-6 flex flex-col items-center justify-center text-center hover:shadow-lg transition-shadow duration-200"
-                        >
-                          <img src={item.icon || "/placeholder.svg"} alt="" className="h-10 w-10 sm:h-12 sm:w-12 object-contain mb-3" aria-hidden="true" />
+                  {insights.map((item, i) => (
+                    <div
+                      key={`slide-${i}`}
+                      className="w-full shrink-0 flex-[0_0_100%]"
+                      aria-hidden={i !== active}
+                    >
+                      <div className="px-6 sm:px-8">
+                        <div className="w-full rounded-xl border border-black/10 bg-white py-8 px-6 flex flex-col items-center justify-center text-center hover:shadow-lg transition-shadow duration-200">
+                          <img
+                            src={item.icon || "/placeholder.svg"}
+                            alt=""
+                            className="h-10 w-10 sm:h-12 sm:w-12 object-contain mb-3"
+                            aria-hidden="true"
+                          />
                           <h3 className="heading3 font-semibold mb-2">{item.text}</h3>
                           <p className="text-black/70 text-sm">{item.description}</p>
                         </div>
@@ -206,7 +155,10 @@ export default function Insights() {
               </div>
 
               {/* Slide Indicator (mobile only) */}
-              <div className="mt-4 mb-2 flex items-center justify-center gap-2" aria-label="Slide indicators">
+              <div
+                className="mt-4 mb-2 flex items-center justify-center gap-2"
+                aria-label="Slide indicators"
+              >
                 {insights.map((_, i) => {
                   const isActive = i === active
                   return (
@@ -226,10 +178,6 @@ export default function Insights() {
                 })}
               </div>
 
-              {/* Live region for SR users */}
-              <span className="sr-only" role="status" aria-live="polite">
-                Slide {active + 1} of {insights.length}
-              </span>
             </div>
           </div>
         </div>

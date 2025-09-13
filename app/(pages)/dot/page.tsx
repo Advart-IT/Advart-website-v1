@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Play, X, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+
 function resolveAsset(path: string, basePath = "") {
   // Ensure exactly one slash between basePath and path
   if (basePath && basePath !== "/") {

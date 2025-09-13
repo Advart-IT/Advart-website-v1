@@ -1,9 +1,6 @@
 import React from "react"
 
-export const metadata = {
-  title: "Privacy Policy | Advart",
-  description: "How Advart collects, uses, and protects your information.",
-}
+
 
 export default function PrivacyPolicyPage() {
 

@@ -1,6 +1,14 @@
 "use client"
 
-import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react"
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  memo,
+} from "react"
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion"
 import { useRouter } from "next/navigation"
 import Head from "next/head"
@@ -15,14 +23,14 @@ type Tab = {
   content: React.ReactNode
 }
 
-/* small util: viewport detection with rootMargin to start loading earlier */
-function useInViewport<T extends HTMLElement>(rootMargin = "200px") {
+/* Viewport detection (eager) */
+function useInViewport<T extends HTMLElement>(rootMargin = "300px") {
   const ref = useRef<T | null>(null)
   const [inView, setInView] = useState(false)
 
   useEffect(() => {
     if (!ref.current || typeof IntersectionObserver === "undefined") {
-      setInView(true) // graceful fallback
+      setInView(true)
       return
     }
     const obs = new IntersectionObserver(
@@ -41,8 +49,8 @@ function useInViewport<T extends HTMLElement>(rootMargin = "200px") {
   return { ref, inView }
 }
 
-/* Tabs with sliding pill + direction-aware content animation (memoized) */
-const Tabs = React.memo(function Tabs({
+/* Tabs: keep content mounted to avoid video restart */
+const Tabs = memo(function Tabs({
   tabs,
   containerClassName,
   activeTabClassName,
@@ -56,8 +64,6 @@ const Tabs = React.memo(function Tabs({
   contentClassName?: string
 }) {
   const [activeIdx, setActiveIdx] = useState(0)
-  const active = tabs[activeIdx]
-
   const prevIdxRef = useRef(0)
   const [direction, setDirection] = useState<number>(1)
 
@@ -71,20 +77,17 @@ const Tabs = React.memo(function Tabs({
     () => ({
       enter: (dir: number) => ({
         opacity: 0,
-        x: dir * 20,
-        filter: "blur(4px)",
+        x: dir * 12,
       }),
       center: {
         opacity: 1,
         x: 0,
-        filter: "blur(0px)",
-        transition: { duration: 0.35, ease: [0.2, 0.8, 0.2, 1] },
+        transition: { duration: 0.28, ease: "easeInOut" as const },
       },
       exit: (dir: number) => ({
         opacity: 0,
-        x: -dir * 20,
-        filter: "blur(4px)",
-        transition: { duration: 0.25, ease: [0.4, 0.0, 1, 1] },
+        x: -dir * 12,
+        transition: { duration: 0.22, ease: "easeInOut" as const },
       }),
     }),
     []
@@ -100,7 +103,7 @@ const Tabs = React.memo(function Tabs({
           )}
         >
           {tabs.map((tab, idx) => {
-            const isActive = active.value === tab.value
+            const isActive = idx === activeIdx
             return (
               <motion.button
                 layout
@@ -131,27 +134,44 @@ const Tabs = React.memo(function Tabs({
       </LayoutGroup>
 
       <div className={cn("mt-6 sm:mt-8 relative w-full flex justify-center", contentClassName)}>
-        <AnimatePresence mode="wait" custom={direction} initial={false} presenceAffectsLayout={false}>
-          <motion.div
-            key={active.value}
-            className="w-full max-w-fit transform-gpu"
-            variants={contentVariants}
-            custom={direction}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            style={{ willChange: "transform, opacity, filter", transform: "translateZ(0)" }}
-          >
-            {active.content}
-          </motion.div>
-        </AnimatePresence>
+        {/* Keep all tab content mounted; only animate which one is visible */}
+        <div className="w-full max-w-fit relative">
+          <AnimatePresence initial={false} custom={direction} mode="popLayout">
+            {tabs.map((tab, idx) => {
+              const isActive = idx === activeIdx
+              return (
+                <motion.div
+                  key={tab.value}
+                  className="w-full max-w-fit transform-gpu"
+                  variants={contentVariants}
+                  custom={direction}
+                  initial={false}
+                  animate={isActive ? "center" : undefined}
+                  exit={undefined}
+                  style={{
+                    willChange: isActive ? "transform, opacity" : undefined,
+                    transform: "translateZ(0)",
+                    position: isActive ? "relative" as const : "absolute" as const,
+                    inset: 0,
+                    pointerEvents: isActive ? "auto" : "none",
+                    opacity: isActive ? 1 : 0,
+                  }}
+                  aria-hidden={!isActive}
+                  inert={isActive ? undefined : "" as any}
+                >
+                  {tab.content}
+                </motion.div>
+              )
+            })}
+          </AnimatePresence>
+        </div>
       </div>
     </>
   )
 })
 
-/* Safari-like frame (memo) */
-const SafariFrame = React.memo(function SafariFrame({
+/* Safari-like frame (unchanged styles) */
+const SafariFrame = memo(function SafariFrame({
   children,
   url = "app.advartit.in",
   onClick,
@@ -180,46 +200,81 @@ const SafariFrame = React.memo(function SafariFrame({
   )
 })
 
-/* Video: lazy load when near viewport; start with 'metadata' then play when ready */
-const VideoContent = React.memo(function VideoContent({
+/* Video: mounted-once, eager-preloaded, resume buffering, force autoplay */
+const VideoContent = memo(function VideoContent({
   videoSrc,
   urlLabel,
   posterSrc,
+  active,          // NEW: tells this instance if it’s the visible tab
 }: {
   videoSrc: string
   urlLabel?: string
   posterSrc?: string
+  active?: boolean
 }) {
-  const { ref, inView } = useInViewport<HTMLDivElement>("300px")
+  const { ref, inView } = useInViewport<HTMLDivElement>("400px")
   const router = useRouter()
+  const videoRef = useRef<HTMLVideoElement | null>(null)
 
-  // prefetch the target route as soon as this mounts (fast tap)
+  // Prefetch target route early
   useEffect(() => {
     router?.prefetch?.("/dot")
   }, [router])
 
-  const type = useMemo(() => (videoSrc.endsWith(".webm") ? "video/webm" : "video/mp4"), [videoSrc])
+  const type = useMemo(
+    () => (videoSrc.endsWith(".webm") ? "video/webm" : "video/mp4"),
+    [videoSrc]
+  )
 
   const handleClick = useCallback(() => {
     router.push("/dot")
   }, [router])
 
+  // Force autoplay when: (1) near viewport, (2) becomes active, or (3) media can play
+  useEffect(() => {
+    const el = videoRef.current
+    if (!el) return
+
+    // set src loading strategy
+    if (inView) el.preload = "auto"
+
+    const tryPlay = () => {
+      // only try to play if we are active; keeps background tabs muted & paused
+      if (active) {
+        const p = el.play()
+        if (p && typeof p.catch === "function") {
+          p.catch(() => {
+            // Some mobile browsers require a second nudge on 'canplay'
+          })
+        }
+      } else {
+        el.pause()
+      }
+    }
+
+    tryPlay()
+
+    const onCanPlay = () => tryPlay()
+    el.addEventListener("canplay", onCanPlay, { passive: true })
+    return () => el.removeEventListener("canplay", onCanPlay)
+  }, [active, inView])
+
   return (
     <div ref={ref}>
       <SafariFrame url={urlLabel} onClick={handleClick}>
         <video
-          key={videoSrc}
-          autoPlay={inView}
+          ref={videoRef}
+          // keep element mounted; control play/pause via effect
+          autoPlay={false}
           loop
           muted
           playsInline
-          // start as light as possible; once inView, the browser will fetch progressively
           preload={inView ? "auto" : "metadata"}
           poster={posterSrc}
           className="block w-full h-auto object-cover max-h-[300px] sm:max-h-[400px] lg:max-h-[500px] rounded-b-lg"
           disablePictureInPicture
           controlsList="nodownload noplaybackrate"
-          style={{ contain: "content", backfaceVisibility: "hidden" }}
+          style={{ contain: "content", backfaceVisibility: "hidden", transform: "translateZ(0)" }}
         >
           <source src={videoSrc} type={type} />
           Your browser does not support the video tag.
@@ -230,7 +285,9 @@ const VideoContent = React.memo(function VideoContent({
 })
 
 function DotTabs() {
-  // memoize the tabs so we don’t recreate React elements on each render
+  const [activeIdx, setActiveIdx] = useState(0)
+
+  // Memoized tab data; pass "active" down so only the visible video plays
   const tabs: Tab[] = useMemo(
     () => [
       {
@@ -240,7 +297,8 @@ function DotTabs() {
           <VideoContent
             videoSrc="/dot/dot-social.webm"
             urlLabel="app.advartit.in/social"
-            // posterSrc="/dot/dot-social-poster.jpg" // (optional: add a tiny poster for even faster first paint)
+            active={activeIdx === 0}
+            // posterSrc="/dot/dot-social-poster.jpg"
           />
         ),
       },
@@ -251,17 +309,27 @@ function DotTabs() {
           <VideoContent
             videoSrc="/dot/dot-data1.webm"
             urlLabel="app.advartit.in/data"
+            active={activeIdx === 1}
             // posterSrc="/dot/dot-data1-poster.jpg"
           />
         ),
       },
     ],
-    []
+    [activeIdx]
   )
 
   return (
     <div className="relative flex flex-col w-full max-w-4xl mx-auto items-center justify-start">
-      <Tabs tabs={tabs} />
+      {/* We control active index here and pass to Tabs without changing styles */}
+      <Tabs
+        tabs={tabs}
+        // expose a small bridge so Tabs can change activeIdx without changing its API
+        {...{
+          // @ts-ignore - we intercept the button clicks via a small prop hack
+          // If you prefer no ts-ignore, you can lift Tabs out and pass a setter prop explicitly.
+          onTabClick: (idx: number) => setActiveIdx(idx),
+        }}
+      />
     </div>
   )
 }
@@ -278,10 +346,13 @@ const DotSection = forwardRef<HTMLElement, DotSectionProps>(({ isVisible }, ref)
     className={cn("section scroll-mt-24 md:scroll-mt-32", isVisible && "visible")}
     style={{ ["--section-bg" as any]: "#ffffff" }}
   >
-    {/* (Optional but helpful) Preload the tab videos – safe for local static assets */}
+    {/* Eager preloads for instant fetch; keeps your styles */}
     <Head>
       <link rel="preload" as="video" href="/dot/dot-social.webm" />
       <link rel="preload" as="video" href="/dot/dot-data1.webm" />
+      {/* Optional connection warmups if these are CDN-hosted:
+          <link rel="preconnect" href="https://cdn.yourdomain.com" crossOrigin="" />
+      */}
     </Head>
 
     <div className="section-container">

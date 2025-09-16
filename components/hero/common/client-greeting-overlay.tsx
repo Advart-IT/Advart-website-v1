@@ -1,43 +1,36 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useLayoutEffect, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import Greetings from "./greetings";
-
-const STORAGE_KEY = "advart_greeting_shown";
 
 export default function ClientGreetingOverlay() {
   const pathname = usePathname();
 
-  // ✅ Allow showing only on these routes (homepage by default)
+  // ✅ Only show overlay on these routes
   const SHOW_ON = useMemo(() => new Set<string>(["/"]), []);
 
-  // If current route is not allowed, don't mount
+  // Check if current route should show greeting
   const routeAllowed = SHOW_ON.has(pathname);
 
-  // Track whether greeting already shown this session
-  const [alreadyShown, setAlreadyShown] = useState<boolean>(true);
-
-  useEffect(() => {
-    try {
-      const wasShown = sessionStorage.getItem(STORAGE_KEY) === "1";
-      setAlreadyShown(wasShown);
-    } catch {
-      // storage blocked — assume not shown
-      setAlreadyShown(false);
+  // If overlay won't render, make sure the app is visible (safety net).
+  useLayoutEffect(() => {
+    if (!routeAllowed) {
+      const app = document.getElementById("__advart_app");
+      if (app) app.style.visibility = "visible";
+      const base = document.getElementById("advart-base-style");
+      if (base && base.parentNode) base.parentNode.removeChild(base);
+      document.documentElement.removeAttribute("data-intro");
     }
-  }, []);
+  }, [routeAllowed]);
 
-  if (!routeAllowed || alreadyShown) return null;
+  if (!routeAllowed) return null;
 
   return (
     <Greetings
       onComplete={() => {
-        try {
-          sessionStorage.setItem(STORAGE_KEY, "1");
-        } catch {
-          /* ignore */
-        }
+        // No longer storing in sessionStorage - greeting will show every time
+        console.log("Greeting animation completed");
       }}
     />
   );

@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -6,7 +7,7 @@ const greetings = ["• வணக்கம்", "• ഹലോ", "• Hello", "�
 
 interface GreetingsProps {
   onComplete: () => void;
-  speed?: number; // duration per greeting in ms
+  speed?: number;    // duration per greeting in ms
   exitDelay?: number; // delay before finish after last greeting
 }
 
@@ -17,10 +18,10 @@ export default function Greetings({ onComplete, speed = 500, exitDelay = 300 }: 
   // Lock scroll & avoid scroll restore during intro
   useEffect(() => {
     const prevOverflow = document.body.style.overflow;
-    const prevScrollRestoration = history.scrollRestoration;
+    const prevScrollRestoration = (history as any).scrollRestoration;
 
     document.body.style.overflow = "hidden";
-    history.scrollRestoration = "manual";
+    (history as any).scrollRestoration = "manual";
     window.scrollTo({ top: 0 });
 
     const onKey = (e: KeyboardEvent) => {
@@ -30,7 +31,7 @@ export default function Greetings({ onComplete, speed = 500, exitDelay = 300 }: 
 
     return () => {
       document.body.style.overflow = prevOverflow || "";
-      history.scrollRestoration = prevScrollRestoration || "auto";
+      (history as any).scrollRestoration = prevScrollRestoration || "auto";
       window.removeEventListener("keydown", onKey);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -58,11 +59,10 @@ export default function Greetings({ onComplete, speed = 500, exitDelay = 300 }: 
       root.removeAttribute("data-intro");
       document.body.style.overflow = "";
 
-      // Make the shell visible now (in case the head script didn't add the "visible" style)
       const app = document.getElementById("__advart_app");
       if (app) app.style.visibility = "visible";
 
-      // Clean up the base style if present (optional)
+      // Clean up the base style if present
       const base = document.getElementById("advart-base-style");
       if (base && base.parentNode) base.parentNode.removeChild(base);
 
@@ -78,10 +78,7 @@ export default function Greetings({ onComplete, speed = 500, exitDelay = 300 }: 
           initial={{ y: 0 }}
           exit={{
             y: "-100vh",
-            transition: {
-              duration: 0.6,
-              ease: [0.4, 0.0, 0.2, 1],
-            },
+            transition: { duration: 0.6, ease: [0.4, 0.0, 0.2, 1] },
           }}
           style={styles.container}
           aria-modal
@@ -116,7 +113,5 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: "bold",
     zIndex: 9999,
   },
-  text: {
-    textAlign: "center",
-  },
+  text: { textAlign: "center" },
 };

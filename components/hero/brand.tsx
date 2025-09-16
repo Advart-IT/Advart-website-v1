@@ -4,14 +4,6 @@ import React, { useLayoutEffect, useRef, useState, useCallback } from "react"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  type CarouselApi,
-} from "@/components/ui/carousel"
-import { cn } from "@/lib/utils"
-
 gsap.registerPlugin(ScrollTrigger)
 
 type CardT = {
@@ -67,6 +59,7 @@ const cards: CardT[] = [
    ========================= */
 const GsapStackScroll: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
+  const currentIndexRef = useRef(0) // keep source of truth without causing re-renders
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const cardRefs = useRef<HTMLDivElement[]>([])
   const tlRef = useRef<gsap.core.Timeline | null>(null)
@@ -75,22 +68,23 @@ const GsapStackScroll: React.FC = () => {
   const navigateToCard = useCallback((targetIndex: number) => {
     const st = stRef.current
     if (!st) return
-
     const clamped = Math.max(0, Math.min(cards.length - 1, targetIndex))
     const progress = clamped / Math.max(cards.length - 1, 1)
     const y = st.start + progress * (st.end - st.start)
-
     window.scrollTo({ top: y, behavior: "smooth" })
+    currentIndexRef.current = clamped
     setCurrentIndex(clamped)
   }, [])
 
   useLayoutEffect(() => {
-    if (!wrapRef.current || cardRefs.current.length === 0) return
+    if (!wrapRef.current) return
 
     const ctx = gsap.context(() => {
       const isMobile = window.innerWidth < 768
 
+      // initial placement
       cardRefs.current.forEach((card, index) => {
+        if (!card) return
         gsap.set(card, {
           yPercent: index === 0 ? 0 : 120,
           zIndex: index + 1,
@@ -140,9 +134,20 @@ const GsapStackScroll: React.FC = () => {
         animation: masterTL,
         onUpdate(self) {
           const newIndex = Math.round(self.progress * (cards.length - 1))
-          if (newIndex !== currentIndex) setCurrentIndex(newIndex)
+          if (newIndex !== currentIndexRef.current) {
+            currentIndexRef.current = newIndex
+            setCurrentIndex(newIndex)
+          }
         },
       })
+
+      // --- DEFAULT TO CARD #2 (index 1) ---
+      const targetIndex = Math.min(1, cards.length - 1)
+      const progress = targetIndex / Math.max(cards.length - 1, 1)
+      const y = st.start + progress * (st.end - st.start)
+      window.scrollTo({ top: y, behavior: "auto" })
+      currentIndexRef.current = targetIndex
+      setCurrentIndex(targetIndex)
 
       tlRef.current = masterTL
       stRef.current = st
@@ -166,13 +171,12 @@ const GsapStackScroll: React.FC = () => {
       stRef.current = null
       ctx.revert()
     }
-  }, [])
+  }, []) // IMPORTANT: run once only
 
   return (
     <div className="relative">
       <section className="relative w-full">
         <div ref={wrapRef} className="relative min-h-screen w-full">
-          {/* FIX: remove fixed; let ScrollTrigger handle pinning */}
           <div className="absolute inset-0 h-screen flex items-center justify-center">
             <div className="relative w-[95%] sm:w-[97%] lg:w-[99%] max-w-7xl mx-auto h-[78vh] sm:h-[70vh] lg:h-[75vh] overflow-hidden">
               {(() => (cardRefs.current.length = cards.length, null))()}
@@ -191,9 +195,9 @@ const GsapStackScroll: React.FC = () => {
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-12 items-center">
                           <div className="space-y-3 sm:space-y-4 lg:space-y-6 order-2 lg:order-1">
                             <div className="card-heading">
-                              <h1 className="text-lg sm:text-2xl lg:text-4xl xl:text-5xl font-light mb-2 sm:mb-3 lg:mb-4 leading-tight">
+                              <h2 className="text-lg sm:text-2xl lg:text-4xl xl:text-5xl font-light mb-2 sm:mb-3 lg:mb-4 leading-tight">
                                 {card.title}
-                              </h1>
+                              </h2>
                               <div className="card-description">
                                 <p className="text-xs sm:text-base lg:text-lg xl:text-xl font-light leading-relaxed text-gray-200">
                                   {card.description}
@@ -236,6 +240,19 @@ const GsapStackScroll: React.FC = () => {
                   </div>
                 </div>
               ))}
+
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 hidden lg:flex gap-2">
+                {cards.map((_, i) => (
+                  <button
+                    key={i}
+                    aria-label={`Go to card ${i + 1}`}
+                    onClick={() => navigateToCard(i)}
+                    className={`h-2.5 w-2.5 rounded-full border border-white/50 transition-all ${
+                      i === currentIndex ? "bg-white" : "bg-white/20 hover:bg-white/40"
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -244,131 +261,265 @@ const GsapStackScroll: React.FC = () => {
   )
 }
 
-/* =========================
-   Mobile carousel (center fix)
-   ========================= */
+/* ==============================================
+   Mobile carousel — NO SHADCN
+   infinite loop + swipe/drag + inertia + snap
+   ============================================== */
+/* ==============================================
+   Mobile carousel — SINGLE SET (no clones)
+   drag + inertia + snap, default to 2nd card
+   ============================================== */
 const MobileScaleCarousel: React.FC = () => {
-  const [api, setApi] = useState<CarouselApi>()
-  const [current, setCurrent] = useState(1)
+  const trackRef = React.useRef<HTMLDivElement | null>(null)
+  const [current, setCurrent] = React.useState(0)
+  const [isInitialized, setIsInitialized] = React.useState(false)
+
+  // start centered on the SECOND slide (index 1)
+  React.useEffect(() => {
+    const el = trackRef.current
+    if (!el || isInitialized) return
+
+    const timer = setTimeout(() => {
+      const second = el.querySelector<HTMLDivElement>('[data-carousel-index="1"]')
+      if (second) {
+        second.scrollIntoView({ block: "nearest", inline: "center" })
+        setIsInitialized(true)
+      }
+    }, 80)
+
+    return () => clearTimeout(timer)
+  }, [isInitialized])
+
+  // scale cards based on distance to center + compute current index
+  const update = React.useCallback(() => {
+    const el = trackRef.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const centerX = rect.left + rect.width / 2
+    const items = Array.from(el.querySelectorAll<HTMLDivElement>('[data-carousel-item="true"]'))
+
+    let closestIdx = 0
+    let closestDist = Infinity
+
+    items.forEach((item, idx) => {
+      const r = item.getBoundingClientRect()
+      const cardCenter = r.left + r.width / 2
+      const dist = Math.abs(cardCenter - centerX)
+      if (dist < closestDist) {
+        closestDist = dist
+        closestIdx = idx
+      }
+      const norm = Math.min(1, dist / (rect.width * 0.5))
+      const scale = 1 - 0.15 * norm // 1..0.85
+      item.style.transform = `scale(${scale})`
+    })
+
+    setCurrent(closestIdx)
+  }, [])
 
   React.useEffect(() => {
-    if (!api) return
-    setCurrent(api.selectedScrollSnap() + 1)
-    api.on("select", () => setCurrent(api.selectedScrollSnap() + 1))
-  }, [api])
+    const el = trackRef.current
+    if (!el) return
+    const onScroll = () => requestAnimationFrame(update)
+    const onResize = () => requestAnimationFrame(update)
+    update()
+    el.addEventListener("scroll", onScroll, { passive: true })
+    window.addEventListener("resize", onResize)
+    return () => {
+      el.removeEventListener("scroll", onScroll)
+      window.removeEventListener("resize", onResize)
+    }
+  }, [update])
+
+  // drag + inertia + snap (no loop correction since there are no clones)
+  React.useEffect(() => {
+    const el = trackRef.current
+    if (!el) return
+
+    let down = false
+    let startX = 0
+    let startLeft = 0
+    let lastX = 0
+    let lastT = 0
+    let vx = 0
+
+    const now = () => performance.now()
+
+    const onPointerDown = (e: PointerEvent) => {
+      down = true
+      el.setPointerCapture(e.pointerId)
+      startX = e.clientX
+      startLeft = el.scrollLeft
+      lastX = startX
+      lastT = now()
+      vx = 0
+      el.style.scrollBehavior = "auto"
+      el.classList.add("dragging")
+    }
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (!down) return
+      const dx = e.clientX - startX
+      el.scrollLeft = startLeft - dx
+      const t = now()
+      const dt = t - lastT
+      if (dt > 0) {
+        vx = (e.clientX - lastX) / dt
+        lastX = e.clientX
+        lastT = t
+      }
+    }
+
+    const snapToNearest = () => {
+      // simple inertia
+      const throwPx = Math.max(-800, Math.min(800, vx * 250))
+      el.style.scrollBehavior = "smooth"
+      el.scrollTo({ left: el.scrollLeft - throwPx })
+
+      // after the throw finishes, snap cleanly to the nearest card
+      window.setTimeout(() => {
+        const rect = el.getBoundingClientRect()
+        const centerX = rect.left + rect.width / 2
+        const items = Array.from(el.querySelectorAll<HTMLDivElement>('[data-carousel-item="true"]'))
+        let nearest = { idx: 0, dist: Infinity, el: null as HTMLDivElement | null }
+        items.forEach((item, idx) => {
+          const r = item.getBoundingClientRect()
+          const cx = r.left + r.width / 2
+          const d = Math.abs(cx - centerX)
+          if (d < nearest.dist) nearest = { idx, dist: d, el: item }
+        })
+        nearest.el?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" })
+      }, 120)
+    }
+
+    const onPointerUp = (e: PointerEvent) => {
+      if (!down) return
+      down = false
+      try {
+        el.releasePointerCapture(e.pointerId)
+      } catch {}
+      el.classList.remove("dragging")
+      snapToNearest()
+    }
+
+    el.addEventListener("pointerdown", onPointerDown)
+    el.addEventListener("pointermove", onPointerMove)
+    window.addEventListener("pointerup", onPointerUp)
+
+    return () => {
+      el.removeEventListener("pointerdown", onPointerDown)
+      el.removeEventListener("pointermove", onPointerMove)
+      window.removeEventListener("pointerup", onPointerUp)
+    }
+  }, [])
 
   return (
     <div className="mx-auto w-full max-w-sm px-2">
-      <Carousel setApi={setApi} className="w-full" opts={{ loop: true, align: "center", containScroll: "trimSnaps" }}>
-        {/* override shadcn's -ml-4 */}
-        <CarouselContent className="py-3 !ml-0">
-          {cards.map((card, index) => (
-            <CarouselItem key={card.title} className="basis-[75%] px-2">
-              <div
-                className={cn(
-                  "transition-transform duration-500 transform-gpu will-change-transform",
-                  { "scale-100": index === current - 1, "scale-[0.85]": index !== current - 1 }
-                )}
-              >
-                <div className="relative w-full h-[480px] overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 bg-black text-white">
-                  <div className="h-full p-4 flex flex-col justify-between">
-                    {/* Image */}
-                    <div className="flex justify-center flex-shrink-0">
-                      <div className="relative w-full max-w-[140px]">
-                        <img
-                          src={card.imageSrc}
-                          alt={card.imageAlt ?? `${card.title} showcase`}
-                          className="w-full h-auto max-h-[120px] object-contain rounded-lg shadow-lg mx-auto"
-                        />
-                      </div>
-                    </div>
+      <div
+        ref={trackRef}
+        className="
+          flex gap-0 overflow-x-auto snap-x snap-mandatory scroll-pl-4 scroll-pr-4 py-3
+          no-scrollbar touch-pan-x select-none
+        "
+        style={{
+          WebkitOverflowScrolling: "touch",
+          overscrollBehaviorX: "contain",
+          scrollBehavior: "smooth",
+        }}
+        aria-label="Advart mobile carousel"
+      >
+        {cards.map((card, idx) => (
+          <div
+            key={card.title + idx}
+            data-carousel-item="true"
+            data-carousel-index={idx}
+            className="basis-[75%] px-2 snap-center shrink-0 transition-transform duration-200 will-change-transform"
+          >
+            <div className="relative w-full h-[480px] overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 bg-black text-white">
+              <div className="h-full p-4 flex flex-col justify-between">
+                {/* Image */}
+                <div className="flex justify-center flex-shrink-0">
+                  <div className="relative w-full max-w-[140px]">
+                    <img
+                      src={card.imageSrc}
+                      alt={card.imageAlt ?? `${card.title} showcase`}
+                      className="w-full h-auto max-h-[120px] object-contain rounded-lg shadow-lg mx-auto"
+                    />
+                  </div>
+                </div>
 
-                    {/* Content */}
-                    <div className="flex-1 flex flex-col justify-between space-y-3 mt-3">
-                      <div className="space-y-2">
-                        <h3 className="text-lg font-light text-white line-clamp-2">{card.title}</h3>
-                        <p className="text-xs text-gray-200 leading-relaxed line-clamp-3">{card.description}</p>
-                      </div>
+                {/* Content */}
+                <div className="flex-1 flex flex-col justify-between space-y-3 mt-3">
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-light text-white line-clamp-2">{card.title}</h3>
+                    <p className="text-xs text-gray-200 leading-relaxed line-clamp-3">{card.description}</p>
+                  </div>
 
-                      <div className="space-y-2">
-                        <h4 className="text-xs font-medium text-white">What did we try?</h4>
-                        <ul className="space-y-1">
-                          {card.whatTried.map((item, i) => (
-                            <li key={i} className="flex items-start text-xs text-gray-300">
-                              <span className="text-white mr-2 mt-0.5 flex-shrink-0">•</span>
-                              <span className="line-clamp-2">{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-medium text-white">What did we try?</h4>
+                    <ul className="space-y-1">
+                      {card.whatTried.map((item, i) => (
+                        <li key={i} className="flex items-start text-xs text-gray-300">
+                          <span className="text-white mr-2 mt-0.5 flex-shrink-0">•</span>
+                          <span className="line-clamp-2">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
 
-                      <div className="space-y-2">
-                        <h4 className="text-xs font-medium text-white">And the result?</h4>
-                        <p className="text-xs text-gray-300 leading-relaxed line-clamp-3">{card.result}</p>
-                      </div>
-                    </div>
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-medium text-white">And the result?</h4>
+                    <p className="text-xs text-gray-300 leading-relaxed line-clamp-3">{card.result}</p>
                   </div>
                 </div>
               </div>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-      </Carousel>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* dots */}
+      <div className="mt-2 flex justify-center gap-1.5">
+        {cards.map((_, i) => (
+          <span
+            key={i}
+            className={i === current ? "h-1.5 w-1.5 rounded-full bg-white" : "h-1.5 w-1.5 rounded-full bg-white/30"}
+            aria-hidden
+          />
+        ))}
+      </div>
     </div>
   )
 }
 
 export default function AdvartSection() {
   return (
-    <>
-      {/* Mobile */}
-      <section id="advart" className="section scroll-mt-24 md:scroll-mt-32 md:hidden">
-        <div className="section-container pb-0">
-          <div className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl">
-            <section className="w-full">
-              <div className="max-w-6xl mx-auto text-center">
-                <h2 className="heading2 pb-1">
-                  All exciting things we do at <span className="font-semibold">Advart...</span>
-                </h2>
-                <p className="paragraph mx-auto text-center whitespace-pre-line">
-                  From scaling a brand from ₹30K to ₹3Cr, to building a homegrown brand like Zing, to creating many more
-                  meaningful brand stories… We love doing it all, while nailing it right!
-                </p>
-              </div>
-            </section>
+    <section id="advart" className="section scroll-mt-24 md:scroll-mt-32">
+      <div className="section-container pb-0">
+        <div className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl">
+          <section className="w-full">
+            <div className="max-w-6xl mx-auto text-center">
+              <h2 className="heading2 pb-1">
+                All exciting things we do at <span className="font-semibold">Advart...</span>
+              </h2>
+              <p className="paragraph mx-auto text-center whitespace-pre-line">
+                From scaling a brand from ₹30K to ₹3Cr, to building a homegrown brand like Zing, to creating many more
+                meaningful brand stories… We love doing it all, while nailing it right!
+              </p>
+            </div>
+          </section>
 
-            <div className="w-full">
+          <div className="w-full">
+            {/* Show mobile carousel on mobile, desktop stack on larger screens */}
+            <div className="md:hidden">
               <MobileScaleCarousel />
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Desktop */}
-      <section
-        id="advart-desktop"
-        className="section scroll-mt-24 md:scroll-mt-32 hidden md:block"
-      >
-        <div className="section-container pb-0">
-          <div className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl">
-            <section className="w-full">
-              <div className="max-w-6xl mx-auto text-center">
-                <h2 className="heading2 pb-1">
-                  All exciting things we do at <span className="font-semibold">Advart...</span>
-                </h2>
-                <p className="paragraph mx-auto text-center whitespace-pre-line">
-                  From scaling a brand from ₹30K to ₹3Cr, to building a homegrown brand like Zing, to creating many more
-                  meaningful brand stories… We love doing it all, while nailing it right!
-                </p>
-              </div>
-            </section>
-
-            <div className="w-full">
+            <div className="hidden md:block">
               <GsapStackScroll />
             </div>
           </div>
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   )
 }

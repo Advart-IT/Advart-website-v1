@@ -5,8 +5,117 @@
 @tailwind utilities;
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .text-balance { text-wrap: balance; }
+
+  /* --- font-size utilities --- */
+  .fs-14 { font-size: 14px; line-height: 1.5; }
+  .fs-16 { font-size: 16px; line-height: 1.5; }
+  .fs-18 { font-size: 18px; line-height: 1.5; }
+
+  /* example fluid classes */
+  .fs-fluid-14-18 {
+    font-size: clamp(14px, calc(0.3472vw + 12.8889px), 18px);
+    line-height: 1.5;
+  }
+  .fs-fluid-18-24 {
+    font-size: clamp(18px, calc(0.8333vw + 15.3333px), 24px);
+    line-height: 1.5;
+  }
+}
+
+@layer components {
+  /* ---------- Typography ---------- */
+  .heading1 {
+    font-size: clamp(24px, calc(2.083333vw + 17.333333px), 48px);
+    line-height: 1.5;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .heading2 {
+    font-size: clamp(20px, calc(1.1vw + 11px), 32px);
+    line-height: 1.5;
+    color: black;
+    padding-bottom: 0.5rem;
+  }
+  @media (min-width: 768px) {
+    .heading2 { padding-bottom: 1rem; }
+  }
+
+  .heading3 {
+    font-size: clamp(16px, calc(0.416667vw + 14.333333px), 18px);
+    line-height: 1.5;
+    color: hsl(var(--foreground));
+    padding-bottom: 0.25rem;
+  }
+  @media (min-width: 768px) {
+    .heading3 { padding-bottom: 1rem; }
+  }
+
+  .paragraph {
+    font-size: clamp(14px, calc(0.208333vw + 13.333333px), 16px);
+    line-height: 1.5;
+    max-width: 65ch;
+    color: #000000B3;
+  }
+
+  /* ---------- Section ---------- */
+  .section {
+    background-color: var(--section-bg, #F6F7F9);
+    color: hsl(var(--card-foreground));
+  }
+
+  .section-container {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 72rem;
+    padding: 2.5rem 1rem;
+  }
+  @media (min-width: 640px) {
+    .section-container { padding: 3.5rem 1.5rem; }
+  }
+  @media (min-width: 768px) {
+    .section-container { padding-top: 4rem; padding-bottom: 4rem; }
+  }
+  @media (min-width: 1024px) {
+    .section-container { padding: 5rem 2rem; }
+  }
+
+  /* ---------- Card ---------- */
+  .card {
+    background-color: hsl(var(--card));
+    color: hsl(var(--card-foreground));
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.5rem;
+  }
+
+  .card-padding { padding: 1rem; }
+  @media (min-width: 640px) { .card-padding { padding: 1.5rem; } }
+  @media (min-width: 1024px) { .card-padding { padding: 2rem; } }
+
+  /* ---------- Button ---------- */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.5rem;
+    background-color: black;
+    color: white;
+    padding: 0.75rem 1.25rem;
+    font-size: clamp(14px, calc(0.104167vw + 13.666667px), 16px);
+    line-height: 1.5;
+    border: 1px solid transparent;
+    transition: all 150ms;
+  }
+  .btn-primary:hover {
+    background-color: #F6F7F9;
+    color: #000000;
+    border-color: #000000;
+  }
+  .btn-primary:focus {
+    outline: 2px solid #000000;
+    outline-offset: 2px;
   }
 }
 
@@ -37,18 +146,10 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 0 0% 3.9%; /* This is a very dark gray, close to black */
+    --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
     --card: 0 0% 3.9%;
     --card-foreground: 0 0% 98%;
@@ -72,28 +173,12 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
   }
 
- body {
-  font-family: 'Figtree', sans-serif;
-}
-}
-
-body::-webkit-scrollbar {
-  display: none;
+  * { @apply border-border; }
+  body { font-family: 'Figtree', sans-serif; }
 }
 
+body::-webkit-scrollbar { display: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

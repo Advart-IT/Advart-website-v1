@@ -5,14 +5,14 @@ export default function AboutPage() {
     <div className="min-h-screen section text-black">
       <div>
         {/* HERO SECTION */}
-        <section className="section" >
+        <section className="section">
           {/* Full-bleed hero image */}
           <div className="relative rounded-none md:rounded-2xl mb-8 overflow-hidden">
             <img
-  src="https://images.unsplash.com/photo-1531297484001-80022131f5a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-  alt="Creative team collaboration"
-  className="w-full h-64 md:h-80 object-cover filter grayscale brightness-110 contrast-125"
-/>
+              src="https://images.unsplash.com/photo-1531297484001-80022131f5a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+              alt="Creative team collaboration"
+              className="w-full max-w-md h-48 md:h-64 object-cover mx-auto"
+            />
 
             <div
               className="pointer-events-none absolute inset-0"
@@ -26,7 +26,9 @@ export default function AboutPage() {
               <div className="px-4 sm:px-6 md:px-8 text-center">
                 <h1 className="heading1 mt-10 ">
                   <span className="text-primary">Agency</span>{" "}
-                  <span className="text-white">that creates the best of marketing talents!</span>
+                  <span className="text-white">
+                    that creates the best of marketing talents!
+                  </span>
                 </h1>
               </div>
             </div>
@@ -37,7 +39,8 @@ export default function AboutPage() {
             <div className="max-w-6xl mx-auto lg:text-center">
               <div className="flex flex-col justify-center space-y-3 md:space-y-4">
                 <h2 className="heading1 pb-0 font-semibold">
-                  And the love for <span className="text-primary">art</span> brought us here…
+                  And the love for <span className="text-primary">art</span>{" "}
+                  brought us here…
                 </h2>
 
                 <div className="space-y-3">
@@ -56,7 +59,10 @@ export default function AboutPage() {
         </section>
 
         {/* TEAM SECTION */}
-        <section className="section" style={{ contentVisibility: "auto", containIntrinsicSize: "700px" }}>
+        <section
+          className="section"
+          style={{ contentVisibility: "auto", containIntrinsicSize: "700px" }}
+        >
           <div className="section-container pt-0">
             <div className="max-w-6xl mx-auto lg:text-center">
               <h2 className="heading1 pb-0">
@@ -75,15 +81,14 @@ export default function AboutPage() {
                 </p>
               </div>
 
-              <div className="relative mx-auto rounded-2xl overflow-hidden shadow-lg max-w-6xl">
+              
                 <img
-                  src="/aboutus/team.webp"
+                  src="/aboutus/team-2.webp"
                   alt="Our Creative Team"
-                  className="w-full h-auto object-cover filter grayscale"
                   loading="lazy"
                   decoding="async"
                 />
-              </div>
+          
             </div>
           </div>
         </section>

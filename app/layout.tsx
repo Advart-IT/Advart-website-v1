@@ -1,5 +1,5 @@
 // app/layout.tsx
-import type { Metadata } from "next/types";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -15,6 +15,13 @@ const OG_IMAGE = `${DOMAIN}/og.jpg`;
 const LOGO = `${DOMAIN}/logo.png`;
 
 const isProd = process.env.NODE_ENV === "production";
+
+// ✅ new viewport export
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#0b0f19",
+};
 
 export const metadata: Metadata = {
   metadataBase: isProd ? new URL(DOMAIN) : undefined,
@@ -55,20 +62,24 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
-    googleBot: { index: true, follow: true, "max-snippet": -1, "max-image-preview": "large", "max-video-preview": -1 },
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-snippet": -1,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
+    },
   },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" }, 
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
     ],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
-    other: [{ rel: "mask-icon", url: "/logo.-1.png", color: "#0b0f19" }],
+    other: [{ rel: "mask-icon", url: "/safari-pinned-tab.svg", color: "#0b0f19" }],
   },
   manifest: "/site.webmanifest",
-  themeColor: "#0b0f19",
-  viewport: { width: "device-width", initialScale: 1 },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -84,7 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               "@context": "https://schema.org",
               "@type": "LocalBusiness",
               "@id": `${DOMAIN}/#local`,
-              name: LEGAL_NAME,        // <— use full legal name here
+              name: LEGAL_NAME,
               legalName: LEGAL_NAME,
               url: DOMAIN,
               image: [OG_IMAGE],
@@ -114,7 +125,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 { "@type": "Offer", itemOffered: { "@type": "Service", name: "Web Design & Development" } },
                 { "@type": "Offer", itemOffered: { "@type": "Service", name: "Content Marketing" } },
               ],
-              sameAs: [], // add socials when ready
+              sameAs: [],
             }),
           }}
         />

@@ -6,7 +6,7 @@ export default function AboutPage() {
     <div className="min-h-screen section text-black">
       {/* HERO */}
       <section className="section">
-        <div className="relative rounded-none md:rounded-2xl mb-8 overflow-hidden">
+        <div className="relative rounded-2xl mb-8 overflow-hidden">
           <div className="relative w-full h-64 md:h-80">
             <Image
               src="https://images.unsplash.com/photo-1531297484001-80022131f5a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=70"
@@ -16,12 +16,12 @@ export default function AboutPage() {
               fetchPriority="high"
               sizes="(max-width: 768px) 100vw, 1200px"
               placeholder="empty"
-              className="object-cover filter grayscale"
+              className="object-cover rounded-2xl grayscale"
             />
           </div>
 
           <div
-            className="pointer-events-none absolute inset-0"
+            className="pointer-events-none absolute inset-0 rounded-2xl"
             aria-hidden="true"
             style={{
               background:
@@ -95,7 +95,7 @@ export default function AboutPage() {
 
             <div className="relative mx-auto">
               <Image
-                src="/aboutus/team-2.webp"
+                src="/aboutus/team.webp"
                 alt="Our Creative Team"
                 width={1600}
                 height={900}
@@ -103,7 +103,7 @@ export default function AboutPage() {
                 decoding="async"
                 sizes="(max-width: 768px) 100vw, 1200px"
                 placeholder="empty"
-                className="w-full h-auto"
+                className="w-full h-auto rounded-2xl grayscale"
               />
             </div>
           </div>

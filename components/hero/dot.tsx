@@ -49,46 +49,48 @@ function useInViewport<T extends HTMLElement>(rootMargin = "300px") {
   return { ref, inView }
 }
 
-/* Tabs: keep content mounted to avoid video restart */
+/* Tabs (controlled) */
+type TabsProps = {
+  tabs: Tab[]
+  containerClassName?: string
+  activeTabClassName?: string
+  tabClassName?: string
+  contentClassName?: string
+  activeIndex?: number
+  onChange?: (index: number) => void
+}
+
 const Tabs = memo(function Tabs({
   tabs,
   containerClassName,
   activeTabClassName,
   tabClassName,
   contentClassName,
-}: {
-  tabs: Tab[]
-  containerClassName?: string
-  activeTabClassName?: string
-  tabClassName?: string
-  contentClassName?: string
-}) {
-  const [activeIdx, setActiveIdx] = useState(0)
-  const prevIdxRef = useRef(0)
+  activeIndex,
+  onChange,
+}: TabsProps) {
+  const isControlled = typeof activeIndex === "number"
+  const [internalIdx, setInternalIdx] = useState(0)
+  const activeIdx = isControlled ? (activeIndex as number) : internalIdx
+
+  const prevIdxRef = useRef(activeIdx)
   const [direction, setDirection] = useState<number>(1)
 
-  const switchTo = useCallback((idx: number) => {
-    setDirection(idx > prevIdxRef.current ? 1 : -1)
-    prevIdxRef.current = idx
-    setActiveIdx(idx)
-  }, [])
+  const switchTo = useCallback(
+    (idx: number) => {
+      setDirection(idx > prevIdxRef.current ? 1 : -1)
+      prevIdxRef.current = idx
+      if (isControlled) onChange?.(idx)
+      else setInternalIdx(idx)
+    },
+    [isControlled, onChange]
+  )
 
   const contentVariants = useMemo(
     () => ({
-      enter: (dir: number) => ({
-        opacity: 0,
-        x: dir * 12,
-      }),
-      center: {
-        opacity: 1,
-        x: 0,
-        transition: { duration: 0.28, ease: "easeInOut" as const },
-      },
-      exit: (dir: number) => ({
-        opacity: 0,
-        x: -dir * 12,
-        transition: { duration: 0.22, ease: "easeInOut" as const },
-      }),
+      enter: (dir: number) => ({ opacity: 0, x: dir * 12 }),
+      center: { opacity: 1, x: 0, transition: { duration: 0.28, ease: "easeInOut" as const } },
+      exit: (dir: number) => ({ opacity: 0, x: -dir * 12, transition: { duration: 0.22, ease: "easeInOut" as const } }),
     }),
     []
   )
@@ -157,7 +159,6 @@ const Tabs = memo(function Tabs({
                     opacity: isActive ? 1 : 0,
                   }}
                   aria-hidden={!isActive}
-                  inert={isActive ? undefined : "" as any}
                 >
                   {tab.content}
                 </motion.div>
@@ -170,7 +171,7 @@ const Tabs = memo(function Tabs({
   )
 })
 
-/* Safari-like frame (unchanged styles) */
+/* Safari-like frame */
 const SafariFrame = memo(function SafariFrame({
   children,
   url = "app.advartit.in",
@@ -205,7 +206,7 @@ const VideoContent = memo(function VideoContent({
   videoSrc,
   urlLabel,
   posterSrc,
-  active,          // NEW: tells this instance if it’s the visible tab
+  active, // true when its tab is visible
 }: {
   videoSrc: string
   urlLabel?: string
@@ -230,33 +231,44 @@ const VideoContent = memo(function VideoContent({
     router.push("/dot")
   }, [router])
 
-  // Force autoplay when: (1) near viewport, (2) becomes active, or (3) media can play
+  // Robust autoplay control
   useEffect(() => {
     const el = videoRef.current
     if (!el) return
 
-    // set src loading strategy
+    // Ensure properties are set (iOS can ignore attributes alone)
+    el.muted = true
+    el.playsInline = true
+
     if (inView) el.preload = "auto"
 
     const tryPlay = () => {
-      // only try to play if we are active; keeps background tabs muted & paused
+      if (!videoRef.current) return
       if (active) {
-        const p = el.play()
-        if (p && typeof p.catch === "function") {
-          p.catch(() => {
-            // Some mobile browsers require a second nudge on 'canplay'
-          })
-        }
+        const p = videoRef.current.play()
+        if (p?.catch) p.catch(() => {
+          // ignore rejections; we retry on various signals
+        })
       } else {
-        el.pause()
+        videoRef.current.pause()
       }
     }
 
     tryPlay()
 
     const onCanPlay = () => tryPlay()
+    const onLoadedData = () => tryPlay()
+    const onVisibility = () => tryPlay()
+
     el.addEventListener("canplay", onCanPlay, { passive: true })
-    return () => el.removeEventListener("canplay", onCanPlay)
+    el.addEventListener("loadeddata", onLoadedData, { passive: true })
+    document.addEventListener("visibilitychange", onVisibility, { passive: true })
+
+    return () => {
+      el.removeEventListener("canplay", onCanPlay)
+      el.removeEventListener("loadeddata", onLoadedData)
+      document.removeEventListener("visibilitychange", onVisibility)
+    }
   }, [active, inView])
 
   return (
@@ -264,8 +276,7 @@ const VideoContent = memo(function VideoContent({
       <SafariFrame url={urlLabel} onClick={handleClick}>
         <video
           ref={videoRef}
-          // keep element mounted; control play/pause via effect
-          autoPlay={false}
+          autoPlay      // let browser try; effect will enforce
           loop
           muted
           playsInline
@@ -320,15 +331,10 @@ function DotTabs() {
 
   return (
     <div className="relative flex flex-col w-full max-w-4xl mx-auto items-center justify-start">
-      {/* We control active index here and pass to Tabs without changing styles */}
       <Tabs
         tabs={tabs}
-        // expose a small bridge so Tabs can change activeIdx without changing its API
-        {...{
-          // @ts-ignore - we intercept the button clicks via a small prop hack
-          // If you prefer no ts-ignore, you can lift Tabs out and pass a setter prop explicitly.
-          onTabClick: (idx: number) => setActiveIdx(idx),
-        }}
+        activeIndex={activeIdx}
+        onChange={setActiveIdx}
       />
     </div>
   )
@@ -346,11 +352,15 @@ const DotSection = forwardRef<HTMLElement, DotSectionProps>(({ isVisible }, ref)
     className={cn("section scroll-mt-24 md:scroll-mt-32", isVisible && "visible")}
     style={{ ["--section-bg" as any]: "#ffffff" }}
   >
-    {/* Eager preloads for instant fetch; keeps your styles */}
+    {/* Eager preloads for instant fetch */}
     <Head>
       <link rel="preload" as="video" href="/dot/dot-social.webm" />
       <link rel="preload" as="video" href="/dot/dot-data1.webm" />
-      {/* Optional connection warmups if these are CDN-hosted:
+      {/* If you have posters, uncomment:
+          <link rel="preload" as="image" href="/dot/dot-social-poster.jpg" />
+          <link rel="preload" as="image" href="/dot/dot-data1-poster.jpg" />
+      */}
+      {/* Optional connection warmups if CDN-hosted:
           <link rel="preconnect" href="https://cdn.yourdomain.com" crossOrigin="" />
       */}
     </Head>

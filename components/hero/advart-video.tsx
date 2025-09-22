@@ -1,8 +1,8 @@
 "use client"
 
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 
-/* ---------- Hook: prefers-reduced-motion (instant read + Safari fallback) ---------- */
+/* ---------- Hook: prefers-reduced-motion ---------- */
 function useReducedMotion() {
   const [reduced, setReduced] = useState(false)
 
@@ -43,49 +43,92 @@ export default function VideoScrolling() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const wrapRef = useRef<HTMLDivElement>(null)
   const reduced = useReducedMotion()
-  const videoLoadedRef = useRef(false)
+  const srcAttachedRef = useRef(false)
 
-  /* Lazy-attach video sources only when visible (prevents any network until in view) */
+  /* Preload the poster image early so we always have an instant paint */
+  useEffect(() => {
+    const posterHref = "/hero/real-poster.jpg"
+    const link = document.createElement("link")
+    link.rel = "preload"
+    link.as = "image"
+    // @ts-ignore: supported in modern Chromium; ignored elsewhere
+    link.fetchPriority = "high"
+    link.href = posterHref
+    document.head.appendChild(link)
+    return () => { document.head.removeChild(link) }
+  }, [])
+
+  /* (Optional) Warm up connection to the video host (DNS/TLS) */
+  useEffect(() => {
+    const origins: string[] = []
+    const nodes: HTMLLinkElement[] = []
+    origins.forEach((href) => {
+      const l = document.createElement("link")
+      l.rel = "preconnect"
+      l.href = href
+      l.crossOrigin = "anonymous"
+      document.head.appendChild(l)
+      nodes.push(l)
+    })
+    return () => nodes.forEach((n) => n.remove())
+  }, [])
+
+  /* Attach video sources EARLY (before visible) + switch to preload="auto" */
   useEffect(() => {
     const el = videoRef.current
     if (!el) return
 
     const attachSrcs = () => {
-      if (videoLoadedRef.current) return
+      if (srcAttachedRef.current) return
       const sources = Array.from(el.querySelectorAll("source")) as HTMLSourceElement[]
       sources.forEach((s) => {
         const dataSrc = s.getAttribute("data-src")
         if (dataSrc) s.src = dataSrc
       })
-      // After setting src on sources, call load()
+      el.preload = "auto"
       el.load()
-      videoLoadedRef.current = true
+      srcAttachedRef.current = true
     }
 
-    const onFirstIntersect: IntersectionObserverCallback = (entries, obs) => {
+    const onNearViewport: IntersectionObserverCallback = (entries, obs) => {
       const entry = entries[0]
-      if (!entry?.isIntersecting) return
-      obs.disconnect()
-      attachSrcs()
-      // Try to play when we first reveal it; browsers allow if muted + inline
-      el.play().catch(() => {})
+      if (!entry) return
+      if (entry.isIntersecting || entry.intersectionRatio > 0) {
+        attachSrcs()
+
+        const onCanPlay = () => el.play().catch(() => {})
+        el.addEventListener("canplay", onCanPlay, { once: true })
+
+        const t = setTimeout(() => el.play().catch(() => {}), 1200)
+
+        obs.disconnect()
+        const cleanup = () => {
+          clearTimeout(t)
+          el.removeEventListener("canplay", onCanPlay)
+        }
+        ;(el as any).__canplayCleanup = cleanup
+      }
     }
 
-    // If no IntersectionObserver (very rare), fall back to delayed load
     if (!("IntersectionObserver" in window)) {
-      const t = setTimeout(() => {
-        attachSrcs()
-        el.play().catch(() => {})
-      }, 500)
+      const t = setTimeout(attachSrcs, 300)
       return () => clearTimeout(t)
     }
 
-    const io = new IntersectionObserver(onFirstIntersect, { threshold: 0.15 })
+    const io = new IntersectionObserver(onNearViewport, {
+      rootMargin: "1200px 0px",
+      threshold: 0,
+    })
     io.observe(el)
-    return () => io.disconnect()
+
+    return () => {
+      io.disconnect()
+      const cleanup = (el as any).__canplayCleanup as undefined | (() => void)
+      if (cleanup) cleanup()
+    }
   }, [])
 
-  /* Play/pause while scrolling (saves CPU/battery) */
+  /* Pause when far off-screen; play when visible (power/bandwidth saver) */
   useEffect(() => {
     const el = videoRef.current
     if (!el) return
@@ -94,8 +137,7 @@ export default function VideoScrolling() {
       const entry = entries[0]
       if (!entry) return
       if (entry.isIntersecting) {
-        // If sources not yet attached (edge case), skip
-        if (!videoLoadedRef.current) return
+        if (!srcAttachedRef.current) return
         el.play().catch(() => {})
       } else {
         if (!el.paused) el.pause()
@@ -107,15 +149,31 @@ export default function VideoScrolling() {
     return () => io.disconnect()
   }, [])
 
-  /* Lazy-load GSAP + ScrollTrigger after wrapper becomes visible (and if motion allowed) */
-  useLayoutEffect(() => {
+  /* -------- GSAP: defer to idle + keep on GPU-only path (was useLayoutEffect) -------- */
+  useEffect(() => {
     const wrap = wrapRef.current
     if (!wrap || reduced) return
+
     let cleanup = () => {}
 
+    // 1) signal compositor early
+    wrap.style.willChange = "transform"
+    wrap.style.backfaceVisibility = "hidden"           // <-- avoid paint glitches
+    wrap.style.transform = `${wrap.style.transform || ""} translateZ(0)` // <-- GPU promotion
+
+    // tiny helper to wait for an idle-ish moment after first paint
+    const rIC =
+      (typeof window !== "undefined" && "requestIdleCallback" in window)
+        ? (window.requestIdleCallback as (cb: () => void, opts?: { timeout?: number }) => number)
+        : ((cb: () => void) => window.setTimeout(cb, 1))
+
+    // Only initialize when close AND when we’ve had a breath on the main thread
     const initGSAP = async () => {
-      const { gsap } = await import("gsap")
-      const { ScrollTrigger } = await import("gsap/ScrollTrigger")
+      // prefetch hint to keep it snappy on repeat visits
+      const [{ gsap }, { ScrollTrigger }] = await Promise.all([
+        import(/* webpackPrefetch: true */ "gsap"),
+        import(/* webpackPrefetch: true */ "gsap/ScrollTrigger"),
+      ])
       gsap.registerPlugin(ScrollTrigger)
 
       const ctx = gsap.context(() => {
@@ -127,7 +185,12 @@ export default function VideoScrolling() {
             const start = mobile ? "top 92%" : "top 85%"
             const end = "center center"
 
-            const anim = gsap.to(wrap, { scale: 1, ease: "none" })
+            // keep animation on the compositor only
+            const anim = gsap.to(wrap, {
+              scale: 1,
+              ease: "none",
+              force3D: true,        // <-- prevents CPU fallbacks
+            })
 
             const st = ScrollTrigger.create({
               trigger: wrap,
@@ -138,10 +201,7 @@ export default function VideoScrolling() {
               fastScrollEnd: true,
             })
 
-            return () => {
-              st.kill()
-              anim.kill()
-            }
+            return () => { st.kill(); anim.kill() }
           }
         )
       }, wrapRef)
@@ -153,15 +213,17 @@ export default function VideoScrolling() {
       const entry = entries[0]
       if (!entry?.isIntersecting) return
       obs.disconnect()
-      initGSAP()
+      // give the browser one idle slice to finish painting/decoding
+      rIC(() => {
+        // and one more frame, for good measure
+        requestAnimationFrame(() => initGSAP())
+      })
     }
 
     const io = new IntersectionObserver(onFirstIntersect, { threshold: 0.1 })
     io.observe(wrap)
-    return () => {
-      io.disconnect()
-      cleanup()
-    }
+
+    return () => { io.disconnect(); cleanup() }
   }, [reduced])
 
   return (
@@ -174,10 +236,13 @@ export default function VideoScrolling() {
         <div
           ref={wrapRef}
           style={{
-            // Start small for animation; if reduced motion, start at 1 to avoid any pop-in.
-            transform: `scale(${reduced ? 1 : 0.6})`,
+            // start at GPU scale; avoid layout; isolate the box
+            transform: `translateZ(0) scale(${reduced ? 1 : 0.6})`,
             transformOrigin: "50% 50%",
             willChange: reduced ? undefined : "transform",
+            contain: "layout paint size",        // <-- prevents expensive ancestor invalidations
+            contentVisibility: "auto",           // <-- skip rendering work when offscreen
+            backfaceVisibility: "hidden",
           }}
           className="w-full aspect-video sm:aspect-[16/9] md:h-[70vh] lg:h-[78vh] overflow-hidden bg-black rounded-2xl motion-reduce:transform-none"
         >
@@ -188,12 +253,15 @@ export default function VideoScrolling() {
             muted
             playsInline
             autoPlay
-            preload="none"            // do not fetch until we attach sources
+            preload="none"
             // @ts-ignore — supported in modern Chromium/Firefox; harmless elsewhere
-            loading="lazy"            // hint to lazy-load poster decode where supported
+            loading="lazy"
             poster="/hero/real-poster.jpg"
+            crossOrigin="anonymous"
+            // @ts-ignore older types
+            disableRemotePlayback
           >
-            {/* We set data-src and attach src only when intersecting to truly lazy-load */}
+            <source media="(max-width: 767px)" data-src="/hero/advart-576p.mp4" type="video/mp4" />
             <source data-src="/hero/advart.webm" type="video/webm" />
             <source data-src="/hero/advart.mp4" type="video/mp4" />
           </video>

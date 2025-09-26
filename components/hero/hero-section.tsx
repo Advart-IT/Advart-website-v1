@@ -391,7 +391,7 @@ export default function HeroSection() {
                         priority={false}
                       />
                       <Image
-                        src="/hero/target.webp"
+                        src="https://soundernarayanasamy.github.io/my-assets/hero/target.webp"
                         alt="target"
                         width={200}
                         height={200}
@@ -422,7 +422,7 @@ export default function HeroSection() {
                   aria-hidden="true"
                 >
                   <Image
-                    src="/hero/target.webp"
+                    src="https://soundernarayanasamy.github.io/my-assets/hero/target.webp"
                     alt="target"
                     width={360}
                     height={360}

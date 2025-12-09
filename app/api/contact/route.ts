@@ -14,7 +14,7 @@ export async function POST(req: Request) {
         pass: process.env.MAIL_PASS,
       },
     });
-
+ 
     // Check SMTP connection
     await transporter.verify();
 

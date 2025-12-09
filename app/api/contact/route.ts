@@ -15,23 +15,27 @@ export async function POST(req: Request) {
       },
     });
 
+    // Check SMTP connection
+    await transporter.verify();
+
     await transporter.sendMail({
       from: `"Website Contact" <${process.env.MAIL_USER}>`,
       to: process.env.MAIL_TO,
-      subject: "New Inquiry from Contact Form",
+      replyTo: body.email,
+      subject: `New Inquiry - ${body.reason}`,
       html: `
-        <h3>Contact Form Details</h3>
+        <h2>Contact Form Inquiry</h2>
         <p><strong>Name:</strong> ${body.firstName}</p>
-        <p><strong>Business:</strong> ${body.business}</p>
+        <p><strong>Business:</strong> ${body.business || "-"}</p>
         <p><strong>Email:</strong> ${body.email}</p>
         <p><strong>Phone:</strong> ${body.phone}</p>
-        <p><strong>Service:</strong> ${body.reason}</p>
+        <p><strong>Service Required:</strong> ${body.reason}</p>
         <p><strong>Message:</strong><br>${body.message || "-"}</p>
       `,
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error("MAIL ERROR:", error);
     return NextResponse.json(
       { success: false, message: "Failed to send mail" },

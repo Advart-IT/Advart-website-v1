@@ -6,7 +6,7 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start -p 3001 -H 127.0.0.1"
   },
   "dependencies": {
     "@studio-freight/lenis": "^1.0.42",
@@ -20,6 +20,7 @@
     "react-dom": "^19",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "undici": "^7.16.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {

@@ -1,7 +1,7 @@
 // sheets.ts
 // Fetch & normalize jobs from Google Sheets via opensheet.elk.sh (read-only)
 // + submitApplication(): send form submissions (incl. Role) to Google Sheets via Apps Script
-
+import { Agent } from "node:https";  
 import { slugify } from "./slug"
 
 export type RawRow = Record<string, string>
@@ -54,14 +54,19 @@ export function normalizeRow(row: RawRow): Job {
 export async function fetchJobs(): Promise<Job[]> {
   try {
     const res = await fetch(OPEN_SHEET_URL, {
-      cache: "no-store", // prefer freshness for job listings
-    })
-    if (!res.ok) throw new Error(`Failed to fetch sheet: ${res.status} ${res.statusText}`)
-    const data = (await res.json()) as RawRow[]
-    return data.map(normalizeRow).filter((j) => j.title) // keep only rows with a title
+      cache: "no-store",
+      dispatcher: new Agent({ family: 4 }),   // <-- FORCE IPv4 ONLY (fixes delay)
+      // ↓↓↓ ADD THIS ↓↓↓
+      timeout: 5000                           // <-- OPTIONAL: stop waiting after 5 seconds
+    } as any);
+
+    if (!res.ok) throw new Error(`Failed to fetch sheet: ${res.status}`);
+
+    const data = (await res.json()) as RawRow[];
+    return data.map(normalizeRow).filter(j => j.title);
   } catch (err) {
-    console.error("Failed to load job data:", err)
-    return []
+    console.error("Failed to load job data:", err);
+    return [];
   }
 }
 

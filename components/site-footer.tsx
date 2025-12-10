@@ -78,7 +78,7 @@ export function SiteFooter() {
             <h3 className="font-semibold text-black mb-3">Quick Links</h3>
             <ul className="space-y-2 text-sm">
               <li><a href="/aboutus" className="text-black/70 hover:text-black transition-colors">About</a></li>
-              <li><a href="/careers" className="text-black/70 hover:text-black transition-colors">Careers</a></li>
+              {/* <li><a href="/careers" className="text-black/70 hover:text-black transition-colors">Careers</a></li> */}
               <li><a href="/contactus" className="text-black/70 hover:text-black transition-colors">Contact</a></li>
             </ul>
           </div>

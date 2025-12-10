@@ -21,7 +21,7 @@ export function SiteHeader() {
     () => [
       { href: "/", label: "Home" },
       { href: "/aboutus", label: "About" },
-      { href: "/careers", label: "Careers" },
+      // { href: "/careers", label: "Careers" },
       { href: "/contactus", label: "Contact" },
     ],
     []

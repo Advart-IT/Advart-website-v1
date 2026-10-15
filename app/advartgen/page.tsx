@@ -6,11 +6,11 @@ import AdvartGen from "@/components/hero/advart-gen";
 export const metadata: Metadata = {
   title: "Advart Gen | AI Product Photography",
   description: "Turn existing product photos into ecommerce, model and lifestyle imagery with Advart Gen's managed AI image production.",
-  alternates: { canonical: "/AdvartGen", languages: { "en-IN": "/AdvartGen" } },
+  alternates: { canonical: "/advartgen", languages: { "en-IN": "/advartgen" } },
   openGraph: {
     title: "Advart Gen | AI Product Photography",
     description: "Product imagery for your next catalogue, collection or campaign.",
-    url: "/AdvartGen",
+    url: "/advartgen",
   },
 };
 

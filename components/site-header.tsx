@@ -21,7 +21,7 @@ export function SiteHeader() {
     () => [
       { href: "/", label: "Home" },
       { href: "/aboutus", label: "About" },
-      { href: "/AdvartGen", label: "AdvartGen" },
+      { href: "/advartgen", label: "AdvartGen" },
       { href: "/careers", label: "Careers" },
       { href: "/contactus", label: "Contact" },
     ],

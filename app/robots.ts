@@ -12,7 +12,7 @@ export default function robots(): MetadataRoute.Robots {
     ],
     sitemap: [
       "https://www.advartit.in/sitemap.xml",
-      "https://www.advartit.in/AdvartGen/sitemap.xml",
+      "https://www.advartit.in/advartgen/sitemap.xml",
     ],
     host: domain,
   };

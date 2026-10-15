@@ -78,7 +78,7 @@ export default function AdvartGen({
             {/* CTA BUTTONS */}
             <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Link
-                href="/AdvartGen/gallery"
+                href="/advartgen/gallery"
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-black/15 bg-transparent px-5 py-3 text-sm font-medium text-black transition-colors hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
               >
                 View Gallery
@@ -88,7 +88,7 @@ export default function AdvartGen({
                 />
               </Link>
               <Link
-                href={dedicated ? "/contactus" : "/AdvartGen"}
+                href={dedicated ? "/contactus" : "/advartgen"}
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-black/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
               >
                 Start Free Trial

@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo"
 import Link from "next/link"
 import { fetchJobBySlug } from "@/lib/jobs"
 import ApplyForm from "@/components/apply-form"
@@ -12,10 +13,11 @@ type Props = {
 export async function generateMetadata({ params }: Props) {
     const { slug } = await params
     const job = await fetchJobBySlug(slug)
-    return {
-        title: job ? `Apply – ${job.title}` : "Apply for a Role",
-        description: job?.jobDescription?.replace(/<[^>]*>/g, "").slice(0, 160) || "Submit your application.",
-    }
+    return pageMetadata(
+        `/careers/${encodeURIComponent(slug)}/apply`,
+        job ? `Apply - ${job.title}` : "Apply for a Role",
+        job?.jobDescription?.replace(/<[^>]*>/g, "").slice(0, 160) || "Submit your application."
+    )
 }
 
 export default async function ApplyJobPage({ params }: Props) {
@@ -50,7 +52,7 @@ export default async function ApplyJobPage({ params }: Props) {
                                     )}
                                     {job.experience != null && (
                                         <span className="inline-flex items-center px-3 py-1 rounded-full border border-gray-300 text-sm">
-                                            0-{Math.abs(job.experience)} {Math.abs(job.experience) === 1 ? "year" : "years"} experience
+                                            0-{Math.abs(Number(job.experience))} {Math.abs(Number(job.experience)) === 1 ? "year" : "years"} experience
                                         </span>
                                     )}
                                 </div>
@@ -99,7 +101,7 @@ export default async function ApplyJobPage({ params }: Props) {
                         <>
                             <h1 className="text-3xl md:text-4xl font-bold mb-2">Job not found</h1>
                             <p>
-                                The opening you're looking for may have been filled or removed.
+                                The opening you&apos;re looking for may have been filled or removed.
                             </p>
                         </>
                     )}

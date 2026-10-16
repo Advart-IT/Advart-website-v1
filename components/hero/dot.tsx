@@ -361,7 +361,7 @@ const DotSection = forwardRef<HTMLElement, DotSectionProps>(({ isVisible }, ref)
           <link rel="preload" as="image" href="/dot/dot-data1-poster.jpg" />
       */}
       {/* Optional connection warmups if CDN-hosted:
-          <link rel="preconnect" href="https://cdn.yourdomain.com" crossOrigin="" />
+
       */}
     </Head>
 

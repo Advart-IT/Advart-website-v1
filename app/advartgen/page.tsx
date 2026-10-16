@@ -1,18 +1,9 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { ArrowRight, ImagePlus, SlidersHorizontal, ShieldCheck } from "lucide-react";
 import AdvartGen from "@/components/hero/advart-gen";
 
-export const metadata: Metadata = {
-  title: "Advart Gen | AI Product Photography",
-  description: "Turn existing product photos into ecommerce, model and lifestyle imagery with Advart Gen's managed AI image production.",
-  alternates: { canonical: "/advartgen", languages: { "en-IN": "/advartgen" } },
-  openGraph: {
-    title: "Advart Gen | AI Product Photography",
-    description: "Product imagery for your next catalogue, collection or campaign.",
-    url: "/advartgen",
-  },
-};
+export const metadata = pageMetadata("/advartgen", "Advart Gen | AI Product Photography", "Turn existing product photos into ecommerce, model and lifestyle imagery with Advart Gen's managed AI image production.");
 
 const steps = [
   { icon: ImagePlus, title: "Start with your product", description: "Share clear product photos and close-ups of the details that matter, from fabric and colour to prints and finishing." },

@@ -1,4 +1,4 @@
-import { config } from "@/components/config";
+import { SITE_URL } from "@/lib/seo";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -10,7 +10,6 @@ export function capitalize(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type GroupBy<T, K extends keyof T> = Record<string, T[]>;
 
 export function groupBy<T, K extends keyof T>(
@@ -30,5 +29,5 @@ export function groupBy<T, K extends keyof T>(
 export function absoluteUrl(path: string) {
   return process.env.NODE_ENV === "development"
     ? `http://localhost:3000${path}`
-    : `https://${config.appUrl}${path}`;
+    : `${SITE_URL}${path}`;
 }

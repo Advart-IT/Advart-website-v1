@@ -14,13 +14,13 @@ export default function BeePhotoShoot({ topImages, bottomBanner }: BeePhotoShoot
         <div className="grid grid-cols-3 gap-3 mb-4">
           {topImages.map((src, i) => (
             <div key={i} className="w-full h-48 sm:h-56 md:h-64 overflow-hidden rounded">
-              <img src={src} className="w-full h-full object-cover" />
+              <img alt={`Beelittle photoshoot image ${i + 1}`} src={src} className="w-full h-full object-cover" />
             </div>
           ))}
         </div>
 
         <div className="w-full h-64 sm:h-72 md:h-80 overflow-hidden rounded">
-          <img src={bottomBanner} className="w-full h-full object-cover" />
+          <img alt="Beelittle photoshoot banner" src={bottomBanner} className="w-full h-full object-cover" />
         </div>
 
       </div>

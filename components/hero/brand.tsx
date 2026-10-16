@@ -366,7 +366,7 @@ const BrandCaseStackDock: React.FC<{ items?: BrandCase[] }> = ({ items: ITEMS = 
           {items.map((item, index) => (
             <div
               key={item.title}
-              ref={(el) => (cardsRef.current[index] = el!)}
+              ref={(el) => { cardsRef.current[index] = el! }}
               className={`case-card sticky top-20 transition-all duration-1000 ease-out ${
                 hasMounted && index > 0 ? "opacity-0 translate-y-16" : ""
               }`}

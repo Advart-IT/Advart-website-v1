@@ -1,7 +1,7 @@
-import { MetadataRoute } from "next";
+import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
-  const domain = "https://advartit.in";
 
   return {
     rules: [
@@ -11,9 +11,9 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
     sitemap: [
-      "https://www.advartit.in/sitemap.xml",
-      "https://www.advartit.in/advartgen/sitemap.xml",
+      `${SITE_URL}/sitemap.xml`,
+      `${SITE_URL}/advartgen/sitemap.xml`,
     ],
-    host: domain,
+    host: SITE_URL,
   };
 }

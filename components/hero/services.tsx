@@ -26,7 +26,7 @@ const CARDS: Card[] = [
     ctaLink: "#",
     content: () => (
       <p>
-        Because when a community truly believes in you, they don't just like your posts... they
+        Because when a community truly believes in you, they don&apos;t just like your posts... they
         become your customers.
       </p>
     ),
@@ -35,7 +35,7 @@ const CARDS: Card[] = [
     title: "Performance Marketing",
     iconPath: "/hero/services/boomerang.webp",
     tooltip:
-      "Our performance marketing is driven by ROI and powered by data, with real-time analytics at its core. From conversion optimisation to precisely targeted campaigns, we focus on acquiring the right customers and delivering measurable growth.",
+      "Data-driven performance marketing for ecommerce growth, focused on ROI. We combine targeted advertising, campaign strategy, real-time analytics and conversion optimisation to help brands acquire the right customers and improve business results.",
     src: "/hero/services/Performance Marketing.webp",
     ctaLink: "#",
     content: () => (

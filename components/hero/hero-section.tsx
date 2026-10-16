@@ -362,7 +362,7 @@ export default function HeroSection() {
                     </p>
 
                     <h1 className="mx-auto text-[9.3vw] sm:text-[6vw] md:text-6xl lg:text-7xl font-normal tracking-normal md:tracking-tight leading-[1.1] sm:leading-tight text-black text-balance max-w-none">
-                      <span className="block">Agency&nbsp;That's</span>
+                      <span className="block">Agency&nbsp;That&apos;s</span>
                       <span className="block">Obsessed&nbsp;About&nbsp;Your</span>
                       <span className="block text-[#ffdc38] font-semibold tracking-normal whitespace-nowrap">
                         <TypeStable

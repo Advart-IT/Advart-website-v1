@@ -69,11 +69,10 @@ export default function AdvartGen({
               From Phone Photos to Production-Ready Visuals.
             </Heading>
             <p className="mt-6 max-w-xl text-base leading-relaxed text-black/65 sm:text-lg">
-              Our AI-powered image production tool transforms
-              simple product photos into professional ecommerce
-              visuals. Turn everyday product photos into
-              high-quality visuals, ready for your ecommerce
-              store, marketplaces and campaigns.
+              Advart Gen (AdvartGen) is Advart&apos;s AI-powered ecommerce product
+              photography service for ecommerce and fashion brands. Transform
+              existing product photos into catalogue, model and lifestyle visuals
+              through a managed image-production workflow.
             </p>
             {/* CTA BUTTONS */}
             <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -89,6 +88,7 @@ export default function AdvartGen({
               </Link>
               <Link
                 href={dedicated ? "/contactus" : "/advartgen"}
+                aria-label={dedicated ? "Start Free Trial - contact Advart" : "Start Free Trial - explore Advart Gen AI product photography"}
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-black/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
               >
                 Start Free Trial

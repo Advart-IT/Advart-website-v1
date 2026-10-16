@@ -162,7 +162,7 @@ export default function DotPage() {
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
                     <p className="text-gray-600">
-                      We've seen both large organisations and small startups struggle with organising work,
+                      We&apos;ve seen both large organisations and small startups struggle with organising work,
                       where missed deadlines and lack of direction become a nightmare.
                     </p>
                   </div>
@@ -170,7 +170,7 @@ export default function DotPage() {
                     <p className="text-gray-600">
                       <span className="font-semibold text-black">Guess what? DOT fixes it.</span>
                       <br />
-                      Whether it's assigning tasks or tracking progress, everything happens in one place…
+                      Whether it&apos;s assigning tasks or tracking progress, everything happens in one place…
                     </p>
                   </div>
                 </div>

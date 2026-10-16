@@ -174,8 +174,8 @@ export default function LusionHero() {
             </h2>
 
             <div className="grid grid-cols-2 gap-4">
-              <img src="/beelittle/sample1.jpg" className="rounded-lg" />
-              <img src="/beelittle/sample2.jpg" className="rounded-lg" />
+              <img alt="Beelittle event highlight" src="/beelittle/sample1.jpg" className="rounded-lg" />
+              <img alt="Beelittle anniversary event" src="/beelittle/sample2.jpg" className="rounded-lg" />
 
               <div className="col-span-2">
                 <p className="text-gray-600 leading-relaxed">

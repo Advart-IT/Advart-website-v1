@@ -32,7 +32,7 @@ export default function SocialArcReels({ videoUrls, className }: Props) {
             style={{ transform: `translateY(${desktopOffsets[i] ?? 0}px)` }}
           >
             <video
-              ref={el => el && (desktopRefs.current[i] = el)}
+              ref={el => { if (el) desktopRefs.current[i] = el }}
               src={url}
               autoPlay
               muted
@@ -52,7 +52,7 @@ export default function SocialArcReels({ videoUrls, className }: Props) {
             className="snap-center flex-shrink-0 relative w-40 h-[350px] rounded-2xl overflow-hidden flex justify-center items-center"
           >
             <video
-              ref={el => el && (mobileRefs.current[i] = el)}
+              ref={el => { if (el) mobileRefs.current[i] = el }}
               src={url}
               autoPlay
               muted

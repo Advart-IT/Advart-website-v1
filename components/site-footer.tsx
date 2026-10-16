@@ -1,6 +1,7 @@
 // components/site-footer.tsx
 // Server Component — no "use client"
 import Image from "next/image";
+import Link from "next/link";
 
 function IconMapPin({ className = "w-5 h-5" }) {
   return (
@@ -41,7 +42,7 @@ export function SiteFooter() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {/* Brand + Description */}
           <div>
-            <a href="/" className="inline-block">
+            <Link href="/" className="inline-block">
               {/* Optimized logo (place /public/logo-1.png) */}
               <Image
                 src="/logo-1.png"
@@ -53,7 +54,7 @@ export function SiteFooter() {
                 className="h-10 w-auto"
               />
               <p className="text-sm text-black/70">The agency for your next move.</p>
-            </a>
+            </Link>
 
             <div className="mt-4 text-sm text-black/70 space-y-3">
               {/* Location with Google Maps link */}

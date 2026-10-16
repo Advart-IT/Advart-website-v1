@@ -79,6 +79,7 @@ export default function CurvedArc({ imageUrls }: CurvedArcProps) {
       >
         <img
           src="/beelittle/beee-01.svg"
+          alt=""
           className="absolute z-20 pointer-events-none"
           style={{
             width: isMobile ? 60 : 110,
@@ -92,7 +93,7 @@ export default function CurvedArc({ imageUrls }: CurvedArcProps) {
         {imageUrls.map((url, i) => (
           <div
             key={i}
-            ref={(el) => (imageRefs.current[i] = el)}
+            ref={(el) => { imageRefs.current[i] = el }}
             className="absolute rounded-xl shadow-xl bg-white overflow-hidden"
             style={{
               width: imgSize,

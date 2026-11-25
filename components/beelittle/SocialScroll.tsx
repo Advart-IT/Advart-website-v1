@@ -21,7 +21,7 @@ export default function SocialArcReels({ videoUrls, className }: Props) {
   const desktopOffsets = [-20, 20, -20, 20, -20];
 
   return (
-    <section className={`w-full bg-white ${className || ""}`}>
+    <section data-track-section="components_beelittle_socialscroll_1" className={`w-full bg-white ${className || ""}`}>
 
       {/* Desktop Zig-Zag */}
       <div className="hidden sm:flex justify-center items-end gap-10">
@@ -31,7 +31,7 @@ export default function SocialArcReels({ videoUrls, className }: Props) {
             className="relative w-52 h-[460px] overflow-hidden rounded-md flex justify-center items-center"
             style={{ transform: `translateY(${desktopOffsets[i] ?? 0}px)` }}
           >
-            <video
+            <video data-track-video="components_beelittle_socialscroll_1"
               ref={el => { if (el) desktopRefs.current[i] = el }}
               src={url}
               autoPlay
@@ -51,7 +51,7 @@ export default function SocialArcReels({ videoUrls, className }: Props) {
             key={i}
             className="snap-center flex-shrink-0 relative w-40 h-[350px] rounded-2xl overflow-hidden flex justify-center items-center"
           >
-            <video
+            <video data-track-video="components_beelittle_socialscroll_2"
               ref={el => { if (el) mobileRefs.current[i] = el }}
               src={url}
               autoPlay

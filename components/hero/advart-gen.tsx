@@ -47,7 +47,7 @@ export default function AdvartGen({
   const activeStyle = styles[selected];
   return (
     <section
-      id="advart-gen"
+      id="advart-gen" data-track-section="advartgen" data-track-view="product_view" data-track-content="advartgen"
       aria-labelledby="advart-gen-heading"
       className="scroll-mt-24 overflow-hidden bg-[#F6F7F9] py-12 text-black sm:py-16 lg:py-20"
     >
@@ -77,7 +77,7 @@ export default function AdvartGen({
             {/* CTA BUTTONS */}
             <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Link
-                href="/advartgen/gallery"
+                href="/advartgen/gallery" data-track-event="product_cta_click" data-track-name="view_gallery" data-track-placement="advartgen_intro" data-track-cta="true"
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-black/15 bg-transparent px-5 py-3 text-sm font-medium text-black transition-colors hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
               >
                 View Gallery
@@ -87,7 +87,7 @@ export default function AdvartGen({
                 />
               </Link>
               <Link
-                href={dedicated ? "/contactus" : "/advartgen"}
+                href={dedicated ? "/contactus" : "/advartgen"} data-track-event="advartgen_cta_click" data-track-name="start_free_trial" data-track-placement={dedicated ? "advartgen_hero" : "homepage_advartgen"} data-track-cta="true"
                 aria-label={dedicated ? "Start Free Trial - contact Advart" : "Start Free Trial - explore Advart Gen AI product photography"}
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-black/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
               >
@@ -103,7 +103,7 @@ export default function AdvartGen({
           <div className="flex min-w-0 flex-col rounded-2xl border border-black/[0.08] bg-white p-4 shadow-sm sm:p-5 lg:h-[440px] lg:min-h-0 lg:self-center">
             {/* IMAGE COMPARISON */}
             <div
-              id="gen-style-preview"
+              id="gen-style-preview" data-track-view="gallery_view" data-track-content="product_comparison"
               className="grid min-h-0 min-w-0 grid-cols-2 gap-3 sm:gap-4 lg:flex-1"
             >
               {/* BEFORE */}
@@ -151,7 +151,7 @@ export default function AdvartGen({
               >
                 {styles.map((style, index) => (
                   <button
-                    key={style.name}
+                    key={style.name} data-track-event="gallery_item_click" data-track-content={style.name.toLowerCase().replace(/[^a-z0-9]+/g, "_")}
                     type="button"
                     aria-pressed={selected === index}
                     aria-controls="gen-style-preview"

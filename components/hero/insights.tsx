@@ -204,7 +204,7 @@ export default function Insights() {
   }, [active, next, prev, goToSlide])
 
   return (
-    <section
+    <section data-track-section="components_hero_insights_1"
       id="insights"
       className="section"
       style={{ contentVisibility: "auto" as any, containIntrinsicSize: "1200px 900px" }}

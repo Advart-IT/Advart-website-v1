@@ -1,4 +1,5 @@
   // app/layout.tsx
+  import AnalyticsProvider from "@/components/analytics/analytics-provider";
   import type { Metadata, Viewport } from "next";
   import "./globals.css";
   import { SiteHeader } from "@/components/site-header";
@@ -38,7 +39,7 @@
   export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
       <html lang="en-IN" dir="ltr">
-        <body className="bg-[#F6F7F9] text-black">
+        <body data-clarity-mask="true" className="bg-[#F6F7F9] text-black">
           <LenisProvider>
             {/* NOTE: app is visible from first paint, so it's ready under the overlay */}
             <div id="__advart_app" className="app-shell flex flex-col min-h-[100dvh]">
@@ -50,6 +51,7 @@
             {/* Overlay sits on top but background is transparent, so the homepage is visible */}
             <ClientGreetingOverlay />
           </LenisProvider>
+          <AnalyticsProvider />
         </body>
       </html>
     );

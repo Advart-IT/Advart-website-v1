@@ -69,7 +69,7 @@ function useOnceVisible<T extends Element>(threshold = 0.05, rootMargin = "15% 0
 }
 
 const BrandCardMobile: React.FC<{ item: BrandCase; first?: boolean }> = ({ item, first }) => (
-  <article className="mx-auto overflow-hidden rounded-2xl bg-black lg:hover:shadow-xl transition-shadow duration-500">
+  <article data-track-view="portfolio_view" data-track-content={item.title.toLowerCase()} className="mx-auto overflow-hidden rounded-2xl bg-black lg:hover:shadow-xl transition-shadow duration-500">
     <div className="flex flex-col">
       <div className="relative overflow-hidden group flex items-center justify-center">
         <img
@@ -292,8 +292,8 @@ const BrandCaseStackDock: React.FC<{ items?: BrandCase[] }> = ({ items: ITEMS = 
   }, [active, items.length, goToSlide]);
 
   return (
-    <section className="relative w-full section-container">
-      <section className="w-full">
+    <section data-track-section="components_hero_brand_1" className="relative w-full section-container">
+      <section data-track-section="components_hero_brand_2" className="w-full">
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="heading2 pb-1">
             All exciting things we do at <span className="font-semibold">Advart...</span>
@@ -347,7 +347,7 @@ const BrandCaseStackDock: React.FC<{ items?: BrandCase[] }> = ({ items: ITEMS = 
                 <button
                   key={i}
                   type="button"
-                  onClick={() => goToSlide(i)}
+                  data-track-event="portfolio_click" data-track-content={`portfolio_${i}`} onClick={() => goToSlide(i)}
                   className={`h-2.5 rounded-full transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-black/50 ${
                     isActive ? "w-6 bg-black" : "w-2.5 bg-black/30 hover:bg-black/50"
                   }`}
@@ -372,7 +372,7 @@ const BrandCaseStackDock: React.FC<{ items?: BrandCase[] }> = ({ items: ITEMS = 
               }`}
               style={{ zIndex: 10 + index }}
             >
-              <article className="mx-auto max-w-6xl overflow-hidden rounded-2xl bg-black hover:shadow-xl transition-shadow duration-500 h-[600px] flex">
+              <article data-track-view="portfolio_view" data-track-content={item.title.toLowerCase()} className="mx-auto max-w-6xl overflow-hidden rounded-2xl bg-black hover:shadow-xl transition-shadow duration-500 h-[600px] flex">
                 <div className="grid grid-cols-1 lg:grid-cols-2 w-full">
                   {/* Content */}
                   <div className="flex flex-col justify-center p-16 bg-black text-white overflow-hidden">

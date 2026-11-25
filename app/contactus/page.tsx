@@ -1,7 +1,9 @@
 "use client";
-import { useState } from "react";
+import { newAttemptId, trackEvent } from "@/lib/analytics";
+import { useRef, useState } from "react";
 
 export default function ContactPage() {
+  const inFlight = useRef(false);
   const [sending, setSending] = useState(false);
 
   const INPUT =
@@ -10,7 +12,10 @@ export default function ContactPage() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    if (sending) return; // prevent double submit
+    if (sending || inFlight.current) return;
+    inFlight.current = true;
+    const attempt = newAttemptId();
+    trackEvent("contact_form_submit", { form_name: "contact" });
     setSending(true);
 
     const form = e.currentTarget;
@@ -29,20 +34,29 @@ export default function ContactPage() {
       });
 
       if (!res.ok) throw new Error("Request failed");
+      const confirmation = await res.json().catch(() => null);
+      if (confirmation?.success === true) {
+        const demo = data.reason === "dot_demo";
+        trackEvent(demo ? "demo_request_success" : "contact_form_success", { form_name: "contact", lead_type: demo ? "demo" : "inquiry" }, { conversionId: attempt });
+      } else {
+        trackEvent("contact_form_error", { form_name: "contact", error_code: "unconfirmed_response" });
+      }
 
       alert("Message sent successfully! 🎉");
       form.reset();
     } catch {
+      trackEvent("contact_form_error", { form_name: "contact", error_code: "request_failed" });
       alert("Failed to send! ❌ Please try again later.");
     } finally {
       clearTimeout(timeout);
+      inFlight.current = false;
       setSending(false);
     }
   }
 
   return (
     <div className="bg-[#F6F7F9] mt-24">
-      <section className="mx-auto max-w-6xl px-4 md:px-0 py-0 md:py-10 text-black">
+      <section data-track-section="app_contactus_page_1" className="mx-auto max-w-6xl px-4 md:px-0 py-0 md:py-10 text-black">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:items-stretch">
 
           {/* LEFT SIDE — UNCHANGED */}
@@ -132,7 +146,7 @@ export default function ContactPage() {
           {/* RIGHT SIDE — UNCHANGED */}
           <div className="md:h-[520px]">
 
-            <form onSubmit={handleSubmit} className="h-full flex flex-col gap-4">
+            <form data-clarity-mask="true" data-track-form="contact" onSubmit={handleSubmit} className="h-full flex flex-col gap-4">
 
               {/* Row 1 */}
               <div className="grid gap-4 sm:grid-cols-2">

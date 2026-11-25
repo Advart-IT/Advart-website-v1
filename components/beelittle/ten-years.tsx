@@ -113,7 +113,7 @@ export default function LusionHero() {
             group
           "
         >
-          <video
+          <video data-track-video="components_beelittle_ten_years_1"
             src="/beelittle/wa.mp4"
             autoPlay
             loop

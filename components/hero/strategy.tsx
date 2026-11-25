@@ -183,7 +183,7 @@ const Strategy = () => {
   const words = strategyText.split(" ");
 
   return (
-    <section
+    <section data-track-section="components_hero_strategy_1"
       id="strategy"
       ref={sectionRef}
       className="section"

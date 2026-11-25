@@ -49,7 +49,7 @@ function VideoInline({
   return (
     <div className="relative overflow-hidden group hover:shadow-xl transition-all duration-500 bg-white/50 backdrop-blur-sm border border-gray-300 rounded-lg shadow-lg w-full h-full">
       <div className="relative w-full h-[52vw] max-h-[420px] lg:h-[420px] overflow-hidden rounded-lg">
-        <video
+        <video data-track-video={srcWebm.includes("dot-social") ? "dot_social_preview" : "dot_data_preview"}
           key={chosen}           // ensures re-render when source changes
           muted
           loop
@@ -112,7 +112,7 @@ export default function DotPage() {
     <div className="min-h-screen bg-[#F6F7F9] text-black py-12 md:py-20">
       <div className="container mx-auto px-4 md:px-6">
         {/* Hero */}
-        <section className="text-center mb-16 md:mb-24">
+        <section data-track-section="app_dot_page_1" className="text-center mb-16 md:mb-24">
           <div className="space-y-4">
             <h1 className="text-4xl md:text-5xl font-bold mb-4 mt-11">
               Do It With <span className="text-[#ffdc38]">DOT</span>
@@ -125,7 +125,7 @@ export default function DotPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8">
             <button
               className="inline-flex items-center justify-center px-8 py-3 rounded-md bg-black text-white hover:bg-white hover:text-black border border-black shadow-sm focus:outline-none text-lg font-medium"
-              onClick={() => openVideo(socialWEBM)}
+              data-track-event="product_cta_click" data-track-name="watch_demo" data-track-placement="dot_hero" data-track-cta="true" onClick={() => openVideo(socialWEBM)}
             >
               Book a Demo
               <ArrowRight className="ml-2 w-5 h-5" />
@@ -134,7 +134,7 @@ export default function DotPage() {
         </section>
 
         {/* Social Media Section */}
-        <section className="mb-16 md:mb-24">
+        <section data-track-section="app_dot_page_2" data-track-view="feature_view" data-track-content="dot_social" className="mb-16 md:mb-24">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               {/* Video */}
@@ -186,7 +186,7 @@ export default function DotPage() {
         </section>
 
         {/* Data Section */}
-        <section>
+        <section data-track-section="app_dot_page_3" data-track-view="feature_view" data-track-content="dot_data">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               {/* Content */}
@@ -236,7 +236,7 @@ export default function DotPage() {
               <X className="w-8 h-8" />
             </button>
 
-            <video autoPlay controls className="w-full h-full rounded-lg bg-black shadow-2xl">
+            <video data-track-video={videoSrc.includes("dot-social") ? "dot_social_demo" : "dot_data_demo"} autoPlay controls className="w-full h-full rounded-lg bg-black shadow-2xl">
               <source src={videoSrc} type="video/webm" />
               {/* Fallback if user clicked WEBM on a Safari device */}
               {videoSrc.includes("dot-social") && <source src={socialMP4} type="video/mp4" />}

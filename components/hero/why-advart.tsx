@@ -33,7 +33,7 @@ const MarqueeContent = memo(function MarqueeContent() {
 function WhyAdvartInner() {
   return (
     <div className="bg-black">
-      <section
+      <section data-track-section="components_hero_why_advart_1"
         /* ⚡️ Skip layout/paint until near viewport; reserve space to avoid CLS */
         style={{
           contentVisibility: "auto" as any,

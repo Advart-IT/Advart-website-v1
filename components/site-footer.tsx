@@ -2,6 +2,7 @@
 // Server Component — no "use client"
 import Image from "next/image";
 import Link from "next/link";
+import CookieSettings from "@/components/analytics/cookie-settings";
 
 function IconMapPin({ className = "w-5 h-5" }) {
   return (
@@ -90,6 +91,7 @@ export function SiteFooter() {
             <ul className="space-y-2 text-sm">
               <li><a href="/privacy-policy" className="text-black/70 hover:text-black transition-colors">Privacy Policy</a></li>
               <li><a href="/terms-conditions" className="text-black/70 hover:text-black transition-colors">Terms &amp; Conditions</a></li>
+              <li><CookieSettings /></li>
             </ul>
           </div>
 

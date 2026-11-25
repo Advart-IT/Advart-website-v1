@@ -36,7 +36,7 @@ export default async function ApplyJobPage({ params }: Props) {
 
                     {job ? (
                         <>
-                            <header className="mb-8">
+                            <header data-track-view="job_detail_view" data-track-content={`job_${job.id}`} data-track-job={job.id} className="mb-8">
                                 <h1 className="text-3xl md:text-4xl font-bold">{job.title}</h1>
 
                                 <div className="mt-3 flex flex-wrap gap-2">
@@ -59,7 +59,7 @@ export default async function ApplyJobPage({ params }: Props) {
 
                                 {/* Job Description */}
                                 {job.jobDescription && (
-                                    <section className="mt-6">
+                                    <section data-track-section="app_careers_job_apply_page_1" className="mt-6">
                                         <h2 className="text-lg font-semibold">Job Description</h2>
                                         <div
                                             className="mt-2 prose prose-sm max-w-none text-gray-800"
@@ -70,7 +70,7 @@ export default async function ApplyJobPage({ params }: Props) {
 
                                 {/* Requirements */}
                                 {job.requirements && (
-                                    <section className="mt-6">
+                                    <section data-track-section="app_careers_job_apply_page_2" className="mt-6">
                                         <h2 className="text-lg font-semibold">Requirements</h2>
                                         <div
                                             className="mt-2 prose prose-sm max-w-none text-gray-800"
@@ -81,7 +81,7 @@ export default async function ApplyJobPage({ params }: Props) {
 
                                 {/* Responsibilities */}
                                 {job.responsibilities && (
-                                    <section className="mt-6">
+                                    <section data-track-section="app_careers_job_apply_page_3" className="mt-6">
                                         <h2 className="text-lg font-semibold">Responsibilities</h2>
                                         <div
                                             className="mt-2 prose prose-sm max-w-none text-gray-800"

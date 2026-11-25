@@ -11,7 +11,6 @@ import React, {
 } from "react"
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion"
 import { useRouter } from "next/navigation"
-import Head from "next/head"
 
 function cn(...classes: (string | undefined | false)[]) {
   return classes.filter(Boolean).join(" ")
@@ -110,7 +109,7 @@ const Tabs = memo(function Tabs({
               <motion.button
                 layout
                 key={tab.value}
-                onClick={() => switchTo(idx)}
+                data-track-event="feature_click" data-track-content={tab.value.replace(/-/g, "_")} onClick={() => switchTo(idx)}
                 className={cn(
                   "relative px-3 sm:px-4 py-1.5 sm:py-2 rounded-full leading-none border text-sm sm:text-base transition-colors",
                   "border-transparent",
@@ -187,7 +186,7 @@ const SafariFrame = memo(function SafariFrame({
         "inline-block w-full max-w-2xl lg:max-w-3xl rounded-lg border border-gray-200 shadow-md overflow-hidden bg-white mx-auto",
         onClick && "cursor-pointer hover:shadow-lg transition-shadow duration-300"
       )}
-      onClick={onClick}
+      data-track-event="product_cta_click" data-track-name="explore_dot" data-track-placement="homepage_dot" data-track-cta="true" onClick={onClick}
     >
       <div className="flex items-center gap-1.5 px-2 py-1 border-b border-gray-200 bg-gray-100">
         <div className="flex-1 flex justify-center min-w-0">
@@ -274,7 +273,7 @@ const VideoContent = memo(function VideoContent({
   return (
     <div ref={ref}>
       <SafariFrame url={urlLabel} onClick={handleClick}>
-        <video
+        <video data-track-video={videoSrc.includes("dot-social") ? "dot_social_preview" : "dot_data_preview"}
           ref={videoRef}
           autoPlay      // let browser try; effect will enforce
           loop
@@ -345,26 +344,13 @@ interface DotSectionProps {
 }
 
 const DotSection = forwardRef<HTMLElement, DotSectionProps>(({ isVisible }, ref) => (
-  <section
+  <section data-track-section="components_hero_dot_1"
     id="dot"
     ref={ref}
     data-section="3"
     className={cn("section scroll-mt-24 md:scroll-mt-32", isVisible && "visible")}
     style={{ ["--section-bg" as any]: "#ffffff" }}
   >
-    {/* Eager preloads for instant fetch */}
-    <Head>
-      <link rel="preload" as="video" href="/dot/dot-social.webm" />
-      <link rel="preload" as="video" href="/dot/dot-data1.webm" />
-      {/* If you have posters, uncomment:
-          <link rel="preload" as="image" href="/dot/dot-social-poster.jpg" />
-          <link rel="preload" as="image" href="/dot/dot-data1-poster.jpg" />
-      */}
-      {/* Optional connection warmups if CDN-hosted:
-
-      */}
-    </Head>
-
     <div className="section-container">
       <div className="max-w-6xl mx-auto w-full">
         <div className="text-center mb-2 sm:mb-4 lg:mb-10">

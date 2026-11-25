@@ -1,5 +1,6 @@
 "use client";
 
+import { trackEvent } from "@/lib/analytics";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -31,7 +32,7 @@ export function SiteHeader() {
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname?.startsWith(href);
 
-  const toggleMenu = () => setOpen((v) => !v);
+  const toggleMenu = () => { trackEvent(open ? "mobile_menu_close" : "mobile_menu_open"); setOpen(!open); };
 
   // GSAP MENU ANIMATION
   useEffect(() => {
@@ -90,13 +91,14 @@ export function SiteHeader() {
       <div className="w-full flex items-center justify-between px-4 sm:px-6 py-3 text-black/90 md:hidden">
 
         {/* LEFT — LOGO */}
-        <Link href="/" className="flex items-center">
+        <Link href="/" className="flex h-[66px] items-center md:h-14">
           <Image
             src="/logo-1.png"
             alt="Advart Logo"
-            width={66}
-            height={66}
-            className=" object-contain"
+            width={5349}
+            height={2620}
+            priority
+            className="h-auto w-[66px] object-contain"
           />
         </Link>
 
@@ -128,13 +130,14 @@ export function SiteHeader() {
 
         {/* LEFT — LOGO */}
         <div className="flex items-center">
-          <Link href="/" className="flex items-center">
+          <Link href="/" className="flex h-[66px] items-center md:h-14">
             <Image
               src="/logo-1.png"
               alt="Advart Logo"
-              width={56}
-              height={56}
-              className="w-14 h-14 object-contain"
+              width={5349}
+              height={2620}
+              priority
+              className="h-auto w-14 object-contain"
             />
           </Link>
         </div>
@@ -175,13 +178,13 @@ export function SiteHeader() {
     <div className="w-full flex items-center justify-between px-4 py-4">
       
       {/* LEFT — LOGO */}
-      <Link href="/" onClick={toggleMenu}>
+      <Link href="/" className="flex h-[66px] items-center" onClick={toggleMenu}>
         <Image
           src="/logo-1.png"
-          width={66}
-          height={66}
+          width={5349}
+          height={2620}
           alt="Advart"
-          className="object-contain"
+          className="h-auto w-[66px] object-contain"
         />
       </Link>
 

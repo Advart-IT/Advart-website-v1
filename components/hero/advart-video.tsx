@@ -45,19 +45,6 @@ export default function VideoScrolling() {
   const reduced = useReducedMotion()
   const srcAttachedRef = useRef(false)
 
-  /* Preload the poster image early so we always have an instant paint */
-  useEffect(() => {
-    const posterHref = "/hero/real-poster.jpg"
-    const link = document.createElement("link")
-    link.rel = "preload"
-    link.as = "image"
-    // @ts-ignore: supported in modern Chromium; ignored elsewhere
-    link.fetchPriority = "high"
-    link.href = posterHref
-    document.head.appendChild(link)
-    return () => { document.head.removeChild(link) }
-  }, [])
-
   /* (Optional) Warm up connection to the video host (DNS/TLS) */
   useEffect(() => {
     const origins: string[] = []
@@ -227,7 +214,7 @@ export default function VideoScrolling() {
   }, [reduced])
 
   return (
-    <section id="video-scroll" className="section">
+    <section data-track-section="components_hero_advart_video_1" id="video-scroll" className="section">
       <div className="section-container pt-0">
         <h2 className="heading2 pb-4 text-center">
           Building Brands <span className="font-semibold">Meaningfully</span>
@@ -246,7 +233,7 @@ export default function VideoScrolling() {
           }}
           className="w-full aspect-video sm:aspect-[16/9] md:h-[70vh] lg:h-[78vh] overflow-hidden bg-black rounded-2xl motion-reduce:transform-none"
         >
-          <video
+          <video data-track-video="components_hero_advart_video_1"
             ref={videoRef}
             className="w-full h-full object-contain md:object-cover"
             loop
@@ -256,7 +243,6 @@ export default function VideoScrolling() {
             preload="none"
             // @ts-ignore — supported in modern Chromium/Firefox; harmless elsewhere
             loading="lazy"
-            poster="/hero/real-poster.jpg"
             crossOrigin="anonymous"
             // @ts-ignore older types
             disableRemotePlayback

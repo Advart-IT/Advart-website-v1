@@ -10,14 +10,14 @@ export default function Page() {
     <main className="bg-white text-black">
 
       {/* SECTION 1 */}
-      <section className="px-5 sm:px-8 md:px-12 py-10 sm:py-14 md:py-20 min-h-screen flex justify-center items-center">
+      <section data-track-section="components_beelittle_page_1" className="px-5 sm:px-8 md:px-12 py-10 sm:py-14 md:py-20 min-h-screen flex justify-center items-center">
         <div className="max-w-7xl w-full mx-auto">
           <BeeLittle />
         </div>
       </section>
 
       {/* SECTION 2 */}
-      <section className="px-5 sm:px-8 md:px-12 py-10 sm:py-14 md:py-20 flex justify-center">
+      <section data-track-section="components_beelittle_page_2" className="px-5 sm:px-8 md:px-12 py-10 sm:py-14 md:py-20 flex justify-center">
         <div className="max-w-7xl w-full mx-auto">
           <CurvedArc
             imageUrls={[
@@ -31,7 +31,7 @@ export default function Page() {
       </section>
 
       {/* SECTION 3 */}
-      <section className="px-5 sm:px-8 md:px-12 py-10 sm:py-14 md:py-20 flex justify-center">
+      <section data-track-section="components_beelittle_page_3" className="px-5 sm:px-8 md:px-12 py-10 sm:py-14 md:py-20 flex justify-center">
         <div className="max-w-7xl w-full mx-auto">
           <SocialArcReels
             videoUrls={[
@@ -46,14 +46,14 @@ export default function Page() {
       </section>
 
       {/* SECTION 4 — Bee SVG Animation */}
-      <section className="px-0 sm:px-0 md:px-0 py-10 sm:py-14 md:py-20">
+      <section data-track-section="components_beelittle_page_4" className="px-0 sm:px-0 md:px-0 py-10 sm:py-14 md:py-20">
         <div className="max-w-full mx-auto w-full">
           <LusionBeePath />
         </div>
       </section>
 
       {/* SECTION 5 — PhotoShoot */}
-      <section className="px-5 sm:px-8 md:px-12 py-10 sm:py-14 md:py-20">
+      <section data-track-section="components_beelittle_page_5" className="px-5 sm:px-8 md:px-12 py-10 sm:py-14 md:py-20">
         <div className="max-w-7xl mx-auto w-full">
           <BeePhotoShoot
             topImages={[

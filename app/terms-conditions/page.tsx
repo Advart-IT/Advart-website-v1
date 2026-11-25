@@ -5,7 +5,7 @@ export default function TermsPage() {
 
   return (
     <div className="bg-[#F6F7F9] mt-24">
-      <section className="mx-auto max-w-6xl px-4 md:px-0 py-10 md:py-14 text-black">
+      <section data-track-section="app_terms_conditions_page_1" className="mx-auto max-w-6xl px-4 md:px-0 py-10 md:py-14 text-black">
         <div className="space-y-8">
           <header className="space-y-2">
             <h1 className="text-3xl md:text-4xl font-semibold">Terms &amp; Conditions</h1>
@@ -16,7 +16,7 @@ export default function TermsPage() {
             <strong> Advart</strong>. By using this site (<strong>advartit.in</strong>), you agree to these Terms and Conditions.
           </p>
 
-          <section className="space-y-3">
+          <section data-track-section="app_terms_conditions_page_2" className="space-y-3">
             <h2 className="text-xl font-semibold">Use of Our Website</h2>
             <p>
               You may use this site for personal purposes to print, download, and share material, provided you do not modify any
@@ -29,7 +29,7 @@ export default function TermsPage() {
             </p>
           </section>
 
-          <section className="space-y-3">
+          <section data-track-section="app_terms_conditions_page_3" className="space-y-3">
             <h2 className="text-xl font-semibold">Visitor Conduct</h2>
             <p>
               Except for personal information (covered under our Privacy Policy), any material you send or post to this site is
@@ -42,14 +42,14 @@ export default function TermsPage() {
             </p>
           </section>
 
-          <section className="space-y-3">
+          <section data-track-section="app_terms_conditions_page_4" className="space-y-3">
             <h2 className="text-xl font-semibold">Site Activity</h2>
             <p>
               We aim to keep the site available 24/7, but downtime may occur. <strong>Advart</strong> is not liable if the site is unavailable.
             </p>
           </section>
 
-          <section className="space-y-3">
+          <section data-track-section="app_terms_conditions_page_5" className="space-y-3">
             <h2 className="text-xl font-semibold">Links to and from Other Websites</h2>
             <p>
               To provide more information, we may link to external websites. Inclusion of a link does not mean we endorse its content.
@@ -57,7 +57,7 @@ export default function TermsPage() {
             </p>
           </section>
 
-          <section className="space-y-3">
+          <section data-track-section="app_terms_conditions_page_6" className="space-y-3">
             <h2 className="text-xl font-semibold">Exclusion of Liability</h2>
             <p>
               <strong>Advart</strong> will not be liable for any loss or damage (direct, indirect, or consequential) including loss
@@ -69,7 +69,7 @@ export default function TermsPage() {
             </p>
           </section>
 
-          <section className="space-y-3">
+          <section data-track-section="app_terms_conditions_page_7" className="space-y-3">
             <h2 className="text-xl font-semibold">Governing Law</h2>
             <p>
              These Terms shall be governed by and construed in accordance with the laws of India. Any disputes arising in
@@ -77,7 +77,7 @@ export default function TermsPage() {
             </p>
           </section>
 
-          <section className="space-y-3">
+          <section data-track-section="app_terms_conditions_page_8" className="space-y-3">
             <h2 className="text-xl font-semibold">Contact</h2>
             <address className="not-italic">
               <strong>Advart</strong><br />

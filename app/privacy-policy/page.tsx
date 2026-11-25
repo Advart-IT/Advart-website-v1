@@ -6,7 +6,7 @@ export default function PrivacyPolicyPage() {
 
   return (
     <div className="bg-[#F6F7F9] mt-24">
-      <section className="mx-auto max-w-6xl px-4 md:px-0 py-10 md:py-14 text-black">
+      <section data-track-section="app_privacy_policy_page_1" className="mx-auto max-w-6xl px-4 md:px-0 py-10 md:py-14 text-black">
         <div className="space-y-8">
           <header className="space-y-2">
             <h1 className="text-3xl md:text-4xl font-semibold">Privacy Policy</h1>
@@ -18,7 +18,7 @@ export default function PrivacyPolicyPage() {
             you agree to this Policy.
           </p>
 
-          <section className="space-y-3">
+          <section data-track-section="app_privacy_policy_page_2" className="space-y-3">
             <h2 className="text-xl font-semibold">Information We Collect</h2>
             <ul className="list-disc pl-5 space-y-1">
               <li><strong>Contact details:</strong> Name, Business name , Email, Phone.</li>
@@ -26,7 +26,7 @@ export default function PrivacyPolicyPage() {
             </ul>
           </section>
 
-          <section className="space-y-3">
+          <section data-track-section="app_privacy_policy_page_3" className="space-y-3">
             <h2 className="text-xl font-semibold">How We Use Your Information</h2>
             <ul className="list-disc pl-5 space-y-1">
               <li>To respond to your inquiries and provide requested services.</li>
@@ -36,7 +36,7 @@ export default function PrivacyPolicyPage() {
             </ul>
           </section>
 
-          <section className="space-y-3">
+          <section data-track-section="app_privacy_policy_page_4" className="space-y-3">
             <h2 className="text-xl font-semibold">Third-Party Processing</h2>
             <p>
               We use <strong>Web3Forms</strong> to process contact form submissions. When you submit the form,
@@ -45,7 +45,7 @@ export default function PrivacyPolicyPage() {
             </p>
           </section>
 
-          <section className="space-y-3">
+          <section data-track-section="app_privacy_policy_page_5" className="space-y-3">
             <h2 className="text-xl font-semibold">Data Retention</h2>
             <p>
               We retain submissions as long as necessary to address your request and for legitimate business or legal purposes.
@@ -53,7 +53,7 @@ export default function PrivacyPolicyPage() {
             </p>
           </section>
 
-          <section className="space-y-3">
+          <section data-track-section="app_privacy_policy_page_6" className="space-y-3">
             <h2 className="text-xl font-semibold">Your Rights</h2>
             <p>
               Depending on your location, you may have rights to access, correct, update, delete, or restrict use of your personal data,
@@ -61,7 +61,7 @@ export default function PrivacyPolicyPage() {
             </p>
           </section>
 
-          <section className="space-y-3">
+          <section data-track-section="app_privacy_policy_page_7" className="space-y-3">
             <h2 className="text-xl font-semibold">Security</h2>
             <p>
               We use reasonable technical and organizational measures to protect your information. However, no method of transmission
@@ -69,21 +69,21 @@ export default function PrivacyPolicyPage() {
             </p>
           </section>
 
-          <section className="space-y-3">
+          <section data-track-section="app_privacy_policy_page_8" className="space-y-3">
             <h2 className="text-xl font-semibold">Children</h2>
             <p>
               Our services are not intended for children below the applicable age in your jurisdiction. We do not knowingly collect such data.
             </p>
           </section>
 
-          <section className="space-y-3">
+          <section data-track-section="app_privacy_policy_page_9" className="space-y-3">
             <h2 className="text-xl font-semibold">Changes to This Policy</h2>
             <p>
               We may update this Policy from time to time. The “Effective” date above reflects the latest version.
             </p>
           </section>
 
-          <section className="space-y-3">
+          <section data-track-section="app_privacy_policy_page_10" className="space-y-3">
             <h2 className="text-xl font-semibold">Contact Us</h2>
             <address className="not-italic">
               <strong>Advart</strong><br />

@@ -320,7 +320,7 @@ export default function HeroSection() {
 
   return (
     <>
-      <section
+      <section data-track-section="components_hero_hero_section_1"
         id="hero"
         ref={heroRef}
         style={{
@@ -331,7 +331,7 @@ export default function HeroSection() {
         }}
       >
         <div className="section-container">
-          <section className="w-full overflow-visible flex flex-col">
+          <section data-track-section="components_hero_hero_section_2" className="w-full overflow-visible flex flex-col">
             <div className="relative isolate grid place-items-center">
               <div className="grid grid-cols-1 md:grid-cols-[auto_1fr_auto] items-start justify-items-start">
                 {/* Left image (desktop only) */}
@@ -407,7 +407,7 @@ export default function HeroSection() {
                     {/* Button AFTER images on mobile */}
                     <div className="mt-6">
                       <a
-                        href="/contactus"
+                        href="/contactus" data-track-event="hero_contact_click" data-track-name="contact_us" data-track-section="hero" data-track-placement="homepage_hero" data-track-cta="true"
                         className="inline-flex items-center justify-center px-5 py-2.5 rounded-md bg-black text-white hover:bg-white hover:text-black border border-black shadow-sm transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
                       >
                         Contact Us

@@ -1,5 +1,6 @@
 "use client"
 
+import { trackEvent } from "@/lib/analytics"
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 
@@ -164,7 +165,7 @@ export default function ServicesSection() {
     return () => clearInterval(id)
   }, [words.length])
 
-  const handleCardClick = useCallback((card: Card) => setActive(card), [])
+  const handleCardClick = useCallback((card: Card) => { trackEvent("service_click", { content_name: card.title.toLowerCase().replace(/[^a-z0-9]+/g, "_") }); setActive(card) }, [])
   const handleCloseModal = useCallback(() => setActive(null), [])
 
   useEffect(() => {
@@ -175,11 +176,11 @@ export default function ServicesSection() {
   }, [active, handleCloseModal])
 
   return (
-    <section id="services" className="section">
+    <section data-track-section="components_hero_services_1" id="services" className="section">
       <div className="section-container">
         <div>
           {/* Heading — left aligned, baseline aligned, no scrollbars */}
-          <section>
+          <section data-track-section="components_hero_services_2">
             <h2 className="heading2 leading-relaxed flex items-baseline justify-center gap-2">
               <span className="align-baseline">Trusted in</span>
 
@@ -214,7 +215,7 @@ export default function ServicesSection() {
           <div className="w-full max-w-6xl mx-auto px-2 sm:px-0">
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
               {CARDS.map((card) => (
-                <div key={card.title} className="relative">
+                <div data-track-view="service_view" data-track-content={card.title.toLowerCase().replace(/[^a-z0-9]+/g, "_")} key={card.title} className="relative">
                   <div
                     onClick={() => handleCardClick(card)}
                     className="w-full rounded-xl border border-black/10 bg-white cursor-pointer py-8 px-6 flex items-center justify-center hover:shadow-lg transition-shadow duration-200"
@@ -306,7 +307,7 @@ export default function ServicesSection() {
       {/* Footer with Get in Touch button */}
 {/* Footer with simple link */}
 <div className="p-4 border-t border-gray-200 flex justify-end">
-  <a href="/contactus" className="text-blue-600 hover:underline">
+  <a data-track-event="cta_click" data-track-cta="true" data-track-placement="service_modal" data-track-name="contact_us" href="/contactus" className="text-blue-600 hover:underline">
     Get in Touch
   </a>
 </div>

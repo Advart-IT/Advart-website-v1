@@ -5,7 +5,7 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen section text-black">
       {/* HERO */}
-      <section className="section">
+      <section data-track-view="about_section_view" data-track-section="about_story" className="section">
         <div className="relative rounded-2xl mb-8 overflow-hidden">
           <div className="relative w-full h-64 md:h-80">
             <Image
@@ -69,7 +69,7 @@ export default function AboutPage() {
       </section>
 
       {/* TEAM */}
-      <section
+      <section data-track-view="team_section_view" data-track-section="about_team"
         className="section"
         style={{ contentVisibility: "auto", containIntrinsicSize: "700px" }}
       >

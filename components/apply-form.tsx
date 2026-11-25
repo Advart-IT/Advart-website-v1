@@ -1,5 +1,6 @@
 "use client"
 
+import { newAttemptId, trackEvent } from "@/lib/analytics"
 import type React from "react"
 import { useRef, useState } from "react"
 import ReCAPTCHA from "react-google-recaptcha"
@@ -57,6 +58,7 @@ export default function ApplyForm({
     resumeFile: null,
   })
 
+  const inFlight = useRef(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const [submitting, setSubmitting] = useState(false)
@@ -148,16 +150,24 @@ export default function ApplyForm({
 
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
+    if (inFlight.current || submitted) return
+    inFlight.current = true
+    const attempt = newAttemptId()
+    trackEvent("job_application_submit", { form_name: "job_application" })
     setSubmitting(true)
     setError("")
 
     if (!validateForm()) {
+      trackEvent("job_application_error", { form_name: "job_application", error_code: "validation_failed" })
+      inFlight.current = false
       setSubmitting(false)
       return
     }
 
     if (!recaptchaToken && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
       setError("Please complete the reCAPTCHA")
+      trackEvent("job_application_error", { form_name: "job_application", error_code: "validation_failed" })
+      inFlight.current = false
       setSubmitting(false)
       return
     }
@@ -180,6 +190,8 @@ export default function ApplyForm({
     // Validate file is uploaded
     if (!form.resumeFile && !form.resumeUrl.trim()) {
       setError("Please upload a resume PDF file")
+      trackEvent("job_application_error", { form_name: "job_application", error_code: "validation_failed" })
+      inFlight.current = false
       setSubmitting(false)
       return
     }
@@ -210,15 +222,19 @@ export default function ApplyForm({
       })
       const json = await res.json()
       if (res.ok && json.ok) {
+        trackEvent("job_application_success", { form_name: "job_application" }, { conversionId: attempt })
+        if (form.resumeFile) trackEvent("resume_upload_success", { form_name: "job_application" }, { conversionId: attempt + ":resume" })
         setSubmitted(true)
         resetForm()
       } else {
         throw new Error(json?.error || "Submission failed")
       }
     } catch (err) {
+      trackEvent("job_application_error", { form_name: "job_application", error_code: "request_failed" })
       const msg = err instanceof Error ? err.message : "Unknown error"
       setError("Failed to submit application: " + msg)
     } finally {
+      inFlight.current = false
       setSubmitting(false)
     }
   }
@@ -242,7 +258,7 @@ export default function ApplyForm({
           <p className="text-gray-600 mt-2">We&apos;ll review your application and get back to you soon.</p>
         </div>
       ) : (
-        <form className="space-y-4" aria-label="Job application form">
+        <form data-clarity-mask="true" data-track-form="job_application" className="space-y-4" aria-label="Job application form">
           {/* Name and Email */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>

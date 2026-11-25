@@ -33,6 +33,11 @@ export default function ContactPage() {
         signal: controller.signal,
       });
 
+      if (res.status === 503) {
+        trackEvent("contact_form_error", { form_name: "contact", error_code: "service_unavailable" });
+        alert("The contact service is temporarily unavailable. Please email digital@advartit.in or try again later.");
+        return;
+      }
       if (!res.ok) throw new Error("Request failed");
       const confirmation = await res.json().catch(() => null);
       if (confirmation?.success === true) {
@@ -40,6 +45,8 @@ export default function ContactPage() {
         trackEvent(demo ? "demo_request_success" : "contact_form_success", { form_name: "contact", lead_type: demo ? "demo" : "inquiry" }, { conversionId: attempt });
       } else {
         trackEvent("contact_form_error", { form_name: "contact", error_code: "unconfirmed_response" });
+        alert("Failed to send! Please try again later.");
+        return;
       }
 
       alert("Message sent successfully! 🎉");
